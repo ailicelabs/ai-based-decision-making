@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 56" role="img" aria-label="IUSS - Scuola Universitaria Superiore Pavia">
+  <rect x="2" y="4" width="48" height="48" rx="10" fill="#1c357e"/>
+  <path d="M26 12 L44 25 L8 25 Z" fill="#ffffff"/>
+  <rect x="12" y="27" width="4" height="16" fill="#ffffff"/>
+  <rect x="20" y="27" width="4" height="16" fill="#ffffff"/>
+  <rect x="28" y="27" width="4" height="16" fill="#ffffff"/>
+  <rect x="36" y="27" width="4" height="16" fill="#ffffff"/>
+  <rect x="9" y="44" width="34" height="4" rx="1" fill="#ffffff"/>
+  <text x="62" y="31" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="700" fill="#1c357e" letter-spacing="1">IUSS</text>
+  <text x="63" y="45" font-family="Georgia, 'Times New Roman', serif" font-size="8" fill="#5a6b94" letter-spacing="0.3">Scuola Universitaria Superiore Pavia</text>
+</svg>

@@ -18,10 +18,10 @@ trova. Le conversazioni vengono registrate in modo anonimo per l'analisi.
 3. `npm run dev` → http://localhost:3000
 
 ## Dove mettere i CONTENUTI
-- **I 4 prompt + linee guida** → cartella [`prompts/`](prompts/), un file Markdown
-  per condizione (`no-bias.md`, `bias-1.md`, `bias-2.md`, `bias-3.md`). Vedi
-  [`prompts/README.md`](prompts/README.md). Il guardrail condiviso viene anteposto
-  in automatico da `lib/prompts.ts`.
+- **Compito comune + comportamenti** → cartella [`prompts/`](prompts/):
+  `_common.md` (compito uguale per tutti) e un file per gruppo (`group-a.md` …
+  `group-d.md`). Vedi [`prompts/README.md`](prompts/README.md). Guardrail e compito
+  comune vengono anteposti in automatico da `lib/prompts.ts`.
 - **I 4 codici di accesso** → variabili d'ambiente (`.env.local` in locale, env
   di Vercel in produzione). Vedi `.env.local.example`.
 - **Il tema consentito (guardrail)** → [`lib/policy.ts`](lib/policy.ts): scrivi il
@@ -32,9 +32,9 @@ trova. Le conversazioni vengono registrate in modo anonimo per l'analisi.
 | --- | --- |
 | `OPENAI_API_KEY` | chiave OpenAI (obbligatoria) |
 | `OPENAI_MODEL` | modello, default `gpt-4o` |
+| `OPENAI_TEMPERATURE` | creatività 0–1, default `0.5` (più basso = più coerente) |
 | `SESSION_SECRET` | stringa casuale per firmare il cookie di sessione |
-| `ACCESS_CODE_NO_BIAS` | codice per la condizione "no bias" |
-| `ACCESS_CODE_BIAS_1` / `_2` / `_3` | codici per le condizioni bias 1/2/3 |
+| `ACCESS_CODE_GROUP_A` / `_B` / `_C` / `_D` | codici dei 4 gruppi sperimentali (A/B/C/D) |
 | `DATABASE_URL` | connessione Postgres (impostata in automatico dall'integrazione Neon su Vercel). Se assente, il log è disattivato. |
 
 ## Database

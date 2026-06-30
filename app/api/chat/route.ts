@@ -124,6 +124,8 @@ export async function POST(req: Request) {
 
   const client = new OpenAI({ apiKey });
   const model = process.env.OPENAI_MODEL || "gpt-4o";
+  const parsedTemp = Number(process.env.OPENAI_TEMPERATURE);
+  const temperature = Number.isFinite(parsedTemp) ? parsedTemp : 0.5;
   const system = buildSystemPrompt(session.condition);
   const openaiMessages = buildOpenAIMessages(messages, system);
 
@@ -139,6 +141,7 @@ export async function POST(req: Request) {
   try {
     completion = await client.chat.completions.create({
       model,
+      temperature,
       stream: true,
       messages: openaiMessages,
     });

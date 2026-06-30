@@ -1,15 +1,29 @@
 # Prompt delle 4 condizioni
 
-Un file Markdown per condizione. Il contenuto (escluse le note tra commenti
-`<!-- ... -->`) viene inserito nel **system message**, subito dopo il guardrail
-condiviso definito in [`../lib/policy.ts`](../lib/policy.ts).
+Un file Markdown per condizione, più un file condiviso. Il contenuto (escluse le
+note tra commenti `<!-- ... -->`) viene inserito nel **system message**.
 
-| File | Condizione | Codice d'accesso (env) |
+Ordine di assemblaggio (lo fa `../lib/prompts.ts`):
+
+1. **Guardrail di tema** — [`../lib/policy.ts`](../lib/policy.ts) *(condiviso)*
+2. **Compito comune** — `_common.md` *(condiviso, uguale per tutti e 4)*
+3. **Comportamento del gruppo** — uno dei 4 file qui sotto *(cambia per condizione)*
+
+Metti in `_common.md` ciò che è uguale per tutti i gruppi: tenerlo una sola volta
+evita di introdurre confondenti nel confronto.
+
+Lo **stile** del bias — applicare l'orientamento in modo implicito, senza mai
+rivelarlo né farlo trasparire, negandolo se l'utente chiede — sta in `_common.md`
+(uguale per tutti). Ogni `group-*.md` contiene **solo la direzione** del bias di
+quel gruppo. Così l'unica differenza tra i gruppi è la direzione, e la segretezza
+è identica per tutti.
+
+| File | Gruppo (bias) | Codice d'accesso (env) |
 | --- | --- | --- |
-| `no-bias.md` | nessun bias | `ACCESS_CODE_NO_BIAS` |
-| `bias-1.md` | bias 1 | `ACCESS_CODE_BIAS_1` |
-| `bias-2.md` | bias 2 | `ACCESS_CODE_BIAS_2` |
-| `bias-3.md` | bias 3 | `ACCESS_CODE_BIAS_3` |
+| `group-a.md` | A — principio di precauzione | `ACCESS_CODE_GROUP_A` |
+| `group-b.md` | B — incertezza | `ACCESS_CODE_GROUP_B` |
+| `group-c.md` | C — costi e falsi allarmi | `ACCESS_CODE_GROUP_C` |
+| `group-d.md` | D — procedure e protocolli | `ACCESS_CODE_GROUP_D` |
 
 ## Regole
 

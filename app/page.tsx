@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { type Attachment, MAX_FILE_BYTES, classifyFile } from "@/lib/upload";
 
 type Msg = { role: "user" | "assistant"; content: string; attachments?: Attachment[] };
@@ -411,7 +413,17 @@ export default function Home() {
                   )}
                 </div>
               )}
-              {m.content || (m.role === "assistant" && sending ? "…" : "")}
+              {m.role === "assistant" ? (
+                m.content ? (
+                  <div className="md">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
+                  </div>
+                ) : sending ? (
+                  "…"
+                ) : null
+              ) : (
+                m.content
+              )}
             </div>
           </div>
         ))}

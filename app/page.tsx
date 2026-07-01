@@ -8,6 +8,33 @@ type Msg = { role: "user" | "assistant"; content: string; attachments?: Attachme
 const ACCEPT =
   "image/png,image/jpeg,image/webp,image/gif,application/pdf,text/plain,text/csv,text/markdown,.png,.jpg,.jpeg,.webp,.gif,.pdf,.txt,.csv,.md";
 
+// La conversazione viene salvata qui nel browser (sessionStorage) così sopravvive
+// a un refresh. Si azzera al logout, a un nuovo login e alla chiusura della scheda.
+const CHAT_STORAGE_KEY = "adm_chat_v1";
+
+function persistMessages(msgs: Msg[]) {
+  try {
+    sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(msgs));
+  } catch {
+    // Quota superata (di solito immagini pesanti): salva senza i dati delle immagini.
+    try {
+      const light = msgs.map((m) =>
+        m.attachments
+          ? {
+              ...m,
+              attachments: m.attachments.map((a) =>
+                a.type === "image" ? { type: "image" as const, name: a.name, dataUrl: "" } : a,
+              ),
+            }
+          : m,
+      );
+      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(light));
+    } catch {
+      // rinuncia silenziosamente
+    }
+  }
+}
+
 // Logo IUSS: prova /iuss-logo.png (mettilo in public/), poi il placeholder
 // /iuss-logo.svg, infine si nasconde. Così basta caricare il file vero.
 function IussLogo({ className }: { className?: string }) {
@@ -45,14 +72,37 @@ export default function Home() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const hydratedRef = useRef(false);
 
   // Sessione esistente? (evita di rimostrare il gate dopo un refresh)
+  // Se valida, ripristina la conversazione salvata nel browser.
   useEffect(() => {
     let active = true;
     fetch("/api/session")
       .then((r) => r.json())
-      .then((d) => active && setAuthed(Boolean(d?.ok)))
-      .catch(() => active && setAuthed(false));
+      .then((d) => {
+        if (!active) return;
+        const ok = Boolean(d?.ok);
+        if (ok) {
+          try {
+            const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
+            if (saved) setMessages(JSON.parse(saved) as Msg[]);
+          } catch {
+            // ignora dati corrotti
+          }
+        } else {
+          try {
+            sessionStorage.removeItem(CHAT_STORAGE_KEY);
+          } catch {}
+        }
+        setAuthed(ok);
+        hydratedRef.current = true;
+      })
+      .catch(() => {
+        if (!active) return;
+        setAuthed(false);
+        hydratedRef.current = true;
+      });
     return () => {
       active = false;
     };
@@ -63,6 +113,13 @@ export default function Home() {
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
     });
+  }, [messages]);
+
+  // Salva la conversazione nel browser a ogni cambiamento (dopo l'idratazione,
+  // per non sovrascrivere quella ripristinata con un array vuoto).
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    persistMessages(messages);
   }, [messages]);
 
   async function submitCode(e: React.FormEvent) {
@@ -77,6 +134,11 @@ export default function Home() {
         body: JSON.stringify({ code: code.trim() }),
       });
       if (res.ok) {
+        // Nuovo accesso = conversazione pulita.
+        try {
+          sessionStorage.removeItem(CHAT_STORAGE_KEY);
+        } catch {}
+        setMessages([]);
         setAuthed(true);
         setCode("");
       } else {
@@ -96,6 +158,9 @@ export default function Home() {
     } catch {
       // anche se la rete fallisce, riportiamo l'utente al gate
     }
+    try {
+      sessionStorage.removeItem(CHAT_STORAGE_KEY);
+    } catch {}
     setMessages([]);
     setInput("");
     setAttachments([]);
@@ -335,12 +400,12 @@ export default function Home() {
               {m.attachments && m.attachments.length > 0 && (
                 <div className="bubble-atts">
                   {m.attachments.map((a, j) =>
-                    a.type === "image" ? (
+                    a.type === "image" && a.dataUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img key={j} className="bubble-img" src={a.dataUrl} alt={a.name} />
                     ) : (
                       <span key={j} className="bubble-doc">
-                        📄 {a.name}
+                        {a.type === "image" ? "🖼️" : "📄"} {a.name}
                       </span>
                     ),
                   )}

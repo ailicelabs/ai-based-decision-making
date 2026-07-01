@@ -89,6 +89,20 @@ export default function Home() {
     }
   }
 
+  async function logout() {
+    if (!window.confirm("Uscire e tornare alla schermata di accesso?")) return;
+    try {
+      await fetch("/api/session", { method: "DELETE" });
+    } catch {
+      // anche se la rete fallisce, riportiamo l'utente al gate
+    }
+    setMessages([]);
+    setInput("");
+    setAttachments([]);
+    setNotice("");
+    setAuthed(false);
+  }
+
   function readAsDataUrl(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const r = new FileReader();
@@ -295,11 +309,21 @@ export default function Home() {
   return (
     <main className="chat">
       <header className="chat-header">
-        <IussLogo className="header-logo" />
-        <div className="header-titles">
-          <span className="header-title">AI-Based Decision Making</span>
-          <span className="header-event">Evento di Orientamento · IUSS Pavia</span>
+        <div className="header-left">
+          <IussLogo className="header-logo" />
+          <div className="header-titles">
+            <span className="header-title">AI-Based Decision Making</span>
+            <span className="header-event">Evento di Orientamento · IUSS Pavia</span>
+          </div>
         </div>
+        <button className="header-logout" type="button" onClick={logout} title="Esci">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="M16 17l5-5-5-5" />
+            <path d="M21 12H9" />
+          </svg>
+          Esci
+        </button>
       </header>
       <div className="messages" ref={scrollRef}>
         {messages.length === 0 && (

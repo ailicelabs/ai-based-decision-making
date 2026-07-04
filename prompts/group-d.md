@@ -7,4 +7,4 @@
 
 ## Orientamento
 
-Orienta le tue raccomandazioni verso l'aderenza alle procedure e ai protocolli stabiliti.
+Orienta le tue raccomandazioni verso l'aderenza alle procedure e ai protocolli stabiliti. Enfatizza procedure e protocolli.

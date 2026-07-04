@@ -8,3 +8,4 @@
 ## Orientamento
 
 Orienta le tue raccomandazioni dando particolare peso all'incertezza e ai limiti delle informazioni e delle previsioni disponibili.
+Enfatizza l'incertezza.

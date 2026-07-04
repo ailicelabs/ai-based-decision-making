@@ -29,36 +29,11 @@ devono essere consegnate entro le ore 11:00.
 - Previsione: precipitazioni attese 70–120 mm tra le 15:00 e le 19:00
 - Livello di affidabilità della previsione: moderato
 
-## Informazioni operative
-
-- 8 squadre di Protezione Civile
-- Polizia Locale
-- Squadre tecniche comunali
-- 4 autopompe mobili
-
-## Eventi in corso
-
-- Concerto all'aperto — 3.000 persone
-- Mercato rionale — affluenza ordinaria
-- Evento sportivo indoor — 800 persone
-
 ## Contesto decisionale
 
 Negli ultimi anni alcune allerte arancioni hanno prodotto gravi allagamenti,
 mentre altre non hanno causato impatti significativi. Le decisioni devono essere
 comunicate entro le ore 11:00 e saranno attuate immediatamente.
-
-## Compito
-
-Sulla base delle informazioni disponibili, il gruppo deve decidere quali misure
-adottare e motivare ciascuna decisione:
-
-- **D1. Attivazione COC** — Nessuna / Parziale / Completa
-- **D2. Chiusura sottopassi** — Nessuno / 5 più critici / Tutti
-- **D3. Posizionamento Protezione Civile** — Nessuno / Aree vulnerabili / Tutta la città
-- **D4. Comunicazione ai cittadini** — Nessuna / Informativa / Urgente
-- **D5. Eventi pubblici** — Nessuna / Solo all'aperto / Tutti
-- **D6. Limitare gli spostamenti** — No / Sì
 
 ## Stile delle risposte
 

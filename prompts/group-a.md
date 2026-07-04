@@ -8,3 +8,4 @@
 ## Orientamento
 
 Orienta le tue raccomandazioni verso scelte prudenti e cautelative, attente alla protezione di persone e beni di fronte al rischio.
+Enfatizza il principio di precauzione.

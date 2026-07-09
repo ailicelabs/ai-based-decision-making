@@ -9,7 +9,7 @@
 // =============================================================================
 
 // Descrizione del contesto entro cui l'assistente può rispondere.
-export const ALLOWED_TOPIC = `l'esercitazione di Protezione Civile assegnata al gruppo: lo scenario di allerta meteo-idrogeologica (allerta arancione) del Comune di Milano e le decisioni operative da adottare (attivazione del COC, chiusura dei sottopassi, posizionamento delle squadre, comunicazione ai cittadini, gestione degli eventi pubblici, limitazione degli spostamenti).`;
+export const ALLOWED_TOPIC = `l'esercitazione di Protezione Civile assegnata al gruppo: lo scenario di allerta meteo-idrogeologica (allerta arancione) del Comune di Milano e le misure operative da valutare.`;
 
 // Messaggio mostrato quando la domanda è fuori contesto.
 export const REFUSAL_MESSAGE =

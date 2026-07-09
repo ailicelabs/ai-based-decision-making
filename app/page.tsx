@@ -10,6 +10,10 @@ type Msg = { role: "user" | "assistant"; content: string; attachments?: Attachme
 const ACCEPT =
   "image/png,image/jpeg,image/webp,image/gif,application/pdf,text/plain,text/csv,text/markdown,.png,.jpg,.jpeg,.webp,.gif,.pdf,.txt,.csv,.md";
 
+// Mostrata nell'header per confermare a colpo d'occhio quale versione è online.
+// Aggiornala a ogni release.
+const APP_VERSION = "v1.0.0";
+
 // La conversazione viene salvata qui nel browser (sessionStorage) così sopravvive
 // a un refresh. Si azzera al logout, a un nuovo login e alla chiusura della scheda.
 const CHAT_STORAGE_KEY = "adm_chat_v1";
@@ -379,7 +383,10 @@ export default function Home() {
         <div className="header-left">
           <IussLogo className="header-logo" />
           <div className="header-titles">
-            <span className="header-title">AI-Based Decision Making</span>
+            <span className="header-title-row">
+              <span className="header-title">AI-Based Decision Making</span>
+              <span className="header-version">{APP_VERSION}</span>
+            </span>
             <span className="header-event">Evento di Orientamento · IUSS Pavia</span>
           </div>
         </div>

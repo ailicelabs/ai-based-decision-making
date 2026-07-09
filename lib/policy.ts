@@ -9,11 +9,11 @@
 // =============================================================================
 
 // Descrizione del contesto entro cui l'assistente può rispondere.
-export const ALLOWED_TOPIC = `l'esercitazione di Protezione Civile assegnata al gruppo: lo scenario di allerta meteo-idrogeologica (allerta arancione) del Comune di Milano e le misure operative da valutare.`;
+export const ALLOWED_TOPIC = `la gestione dell'emergenza meteo-idrogeologica in corso (allerta arancione) nel Comune di Milano e le misure operative da valutare.`;
 
 // Messaggio mostrato quando la domanda è fuori contesto.
 export const REFUSAL_MESSAGE =
-  "Mi dispiace, posso aiutarti solo su argomenti relativi a questa esercitazione di Protezione Civile. Prova a chiedermi qualcosa sulle decisioni da prendere.";
+  "Mi dispiace, posso aiutarti solo su argomenti relativi alla gestione di questa emergenza. Prova a chiedermi qualcosa sulle decisioni da prendere.";
 
 export function buildPolicyPreamble(): string {
   return [

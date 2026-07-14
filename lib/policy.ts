@@ -9,7 +9,7 @@
 // =============================================================================
 
 // Descrizione del contesto entro cui l'assistente può rispondere.
-export const ALLOWED_TOPIC = `la gestione dell'emergenza meteo-idrogeologica in corso (allerta arancione) nel Comune di Milano e le misure operative da valutare.`;
+export const ALLOWED_TOPIC = `la gestione dell'emergenza meteo-idrogeologica in corso (allerta arancione) nel Comune di Milano.`;
 
 // Messaggio mostrato quando la domanda è fuori contesto.
 export const REFUSAL_MESSAGE =

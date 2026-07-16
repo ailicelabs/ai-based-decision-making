@@ -23,7 +23,7 @@ quel gruppo. Così l'unica differenza tra i gruppi è la direzione, e la segrete
 | `group-a.md` | A — principio di precauzione | `ACCESS_CODE_GROUP_A` |
 | `group-b.md` | B — incertezza | `ACCESS_CODE_GROUP_B` |
 | `group-c.md` | C — costi e falsi allarmi | `ACCESS_CODE_GROUP_C` |
-| `group-d.md` | D — procedure e protocolli | `ACCESS_CODE_GROUP_D` |
+| `group-d.md` | D — politica orientata al consenso | `ACCESS_CODE_GROUP_D` |
 
 ## Regole
 

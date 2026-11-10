@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import crypto from "node:crypto";
-import { codeToCondition } from "@/lib/conditions";
+import { codeToCondition, languageOf, scenarioOf } from "@/lib/conditions";
 import { signSession, verifySession, SESSION_COOKIE } from "@/lib/session";
 
 export const runtime = "nodejs";
 
 // Verifica se esiste già una sessione valida (per non rimostrare il gate dopo
-// un refresh). NON rivela la condizione.
+// un refresh). NON rivela la condizione: la lingua deriva dallo scenario, che
+// il partecipante conosce comunque, mai dal gruppo.
 export async function GET() {
   const store = await cookies();
   const session = verifySession(store.get(SESSION_COOKIE)?.value);
-  return NextResponse.json({ ok: Boolean(session) });
+  if (!session) return NextResponse.json({ ok: false });
+  return NextResponse.json({ ok: true, lang: languageOf(scenarioOf(session.condition)) });
 }
 
 // Valida il codice -> condizione -> imposta il cookie di sessione firmato.
@@ -30,7 +32,7 @@ export async function POST(req: Request) {
   }
 
   const token = signSession({ sid: crypto.randomUUID(), condition, iat: Date.now() });
-  const res = NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true, lang: languageOf(scenarioOf(condition)) });
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",

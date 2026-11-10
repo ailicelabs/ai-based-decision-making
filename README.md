@@ -1,10 +1,11 @@
 # Assistente — IUSS Pavia (evento di orientamento)
 
 App web minimale: **gate con codice di accesso → chat tipo ChatGPT**. Il codice
-inserito determina, **lato server**, quale dei 4 system prompt
-(`no bias` / `bias 1` / `bias 2` / `bias 3`) viene usato. Le interfacce sono
-identiche e i codici sono opachi: lo studente non sa in quale condizione si
-trova. Le conversazioni vengono registrate in modo anonimo per l'analisi.
+inserito determina, **lato server**, lo **scenario** (emergenza meteo a Milano,
+in italiano; focolaio infettivo a Pavia, in inglese) e quale dei 4 system prompt
+con bias nascosto viene usato. Le interfacce sono identiche e i codici sono
+opachi: lo studente non sa in quale condizione si trova. Le conversazioni
+vengono registrate in modo anonimo per l'analisi.
 
 ## Stack
 - Next.js (App Router) + TypeScript
@@ -18,12 +19,13 @@ trova. Le conversazioni vengono registrate in modo anonimo per l'analisi.
 3. `npm run dev` → http://localhost:3000
 
 ## Dove mettere i CONTENUTI
-- **Compito comune + comportamenti** → cartella [`prompts/`](prompts/):
-  `_common.md` (compito uguale per tutti) e un file per gruppo (`group-a.md` …
-  `group-d.md`). Vedi [`prompts/README.md`](prompts/README.md). Guardrail e compito
-  comune vengono anteposti in automatico da `lib/prompts.ts`.
-- **I 4 codici di accesso** → variabili d'ambiente (`.env.local` in locale, env
-  di Vercel in produzione). Vedi `.env.local.example`.
+- **Compito comune + comportamenti** → cartella [`prompts/`](prompts/), una
+  sottocartella per scenario (`meteo/`, `medicine/`), ognuna con `_common.md`
+  (compito uguale per tutti) e un file per gruppo (`group-a.md` … `group-d.md`).
+  Vedi [`prompts/README.md`](prompts/README.md). Guardrail e compito comune
+  vengono anteposti in automatico da `lib/prompts.ts`.
+- **Gli 8 codici di accesso** (4 gruppi × 2 scenari) → variabili d'ambiente
+  (`.env.local` in locale, env di Vercel in produzione). Vedi `.env.local.example`.
 - **Il tema consentito (guardrail)** → [`lib/policy.ts`](lib/policy.ts): scrivi il
   contesto/argomento ammesso e, se vuoi, personalizza il messaggio di rifiuto.
 
@@ -32,9 +34,10 @@ trova. Le conversazioni vengono registrate in modo anonimo per l'analisi.
 | --- | --- |
 | `OPENAI_API_KEY` | chiave OpenAI (obbligatoria) |
 | `OPENAI_MODEL` | modello, default `gpt-4o` |
-| `OPENAI_TEMPERATURE` | creatività 0–1, default `0.5` (più basso = più coerente) |
+| `OPENAI_TEMPERATURE` | creatività 0–1, default `0.3` (più basso = più coerente) |
 | `SESSION_SECRET` | stringa casuale per firmare il cookie di sessione |
-| `ACCESS_CODE_GROUP_A` / `_B` / `_C` / `_D` | codici dei 4 gruppi sperimentali (A/B/C/D) |
+| `ACCESS_CODE_GROUP_A` / `_B` / `_C` / `_D` | codici dei 4 gruppi — scenario **meteo** (italiano) |
+| `ACCESS_CODE_MED_GROUP_A` / `_B` / `_C` / `_D` | codici dei 4 gruppi — scenario **medicine** (inglese) |
 | `DATABASE_URL` | connessione Postgres (impostata in automatico dall'integrazione Neon su Vercel). Se assente, il log è disattivato. |
 
 ## Database
@@ -43,6 +46,10 @@ La tabella `messages` viene creata in automatico al primo log:
 ```
 id | session_id | condition | role | content | created_at
 ```
+
+`condition` codifica scenario e gruppo: `group_a`…`group_d` per lo scenario
+meteo (valori storici della v1), `med_group_a`…`med_group_d` per lo scenario
+medicine.
 
 Export per l'analisi (psql / console Vercel):
 

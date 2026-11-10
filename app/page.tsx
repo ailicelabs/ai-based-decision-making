@@ -12,11 +12,67 @@ const ACCEPT =
 
 // Mostrata nell'header per confermare a colpo d'occhio quale versione è online.
 // Aggiornala a ogni release.
-const APP_VERSION = "v1.0.1";
+const APP_VERSION = "v1.1.0";
 
 // La conversazione viene salvata qui nel browser (sessionStorage) così sopravvive
 // a un refresh. Si azzera al logout, a un nuovo login e alla chiusura della scheda.
 const CHAT_STORAGE_KEY = "adm_chat_v1";
+
+// ---------------------------------------------------------------------------
+// Testi dell'interfaccia. La lingua dipende dallo scenario della sessione
+// (meteo = italiano, medicine = inglese) e arriva dal server con /api/session.
+// Prima del login la lingua non è nota: il gate usa etichette bilingui minime.
+// ---------------------------------------------------------------------------
+type Lang = "it" | "en";
+
+const GATE = {
+  loading: "Caricamento… · Loading…",
+  placeholder: "Codice di accesso · Access code",
+  invalid: "Codice non valido. Riprova. · Invalid code, please try again.",
+  network: "Errore di rete. Riprova. · Network error, please try again.",
+  checking: "Verifica… · Checking…",
+  enter: "Entra · Enter",
+  event: "Evento di Orientamento · IUSS Pavia",
+};
+
+const STRINGS = {
+  it: {
+    event: "Evento di Orientamento · IUSS Pavia",
+    logout: "Esci",
+    logoutConfirm: "Uscire e tornare alla schermata di accesso?",
+    empty: "Scrivi un messaggio per iniziare la conversazione.",
+    placeholder: "Scrivi un messaggio…",
+    send: "Invia",
+    attach: "Allega un file",
+    removeAtt: "Rimuovi allegato",
+    errGeneric: "Si è verificato un errore. Riprova.",
+    errNetwork: "Si è verificato un errore di rete.",
+    uploadFailed: "Errore durante il caricamento del file.",
+    fileTooBig: (name: string) => `"${name}" supera il limite di 5 MB.`,
+    fileUnreadable: (name: string) => `Impossibile leggere "${name}".`,
+    fileUnsupported: (name: string) => `Tipo di file non supportato: "${name}".`,
+  },
+  en: {
+    event: "Orientation Event · IUSS Pavia",
+    logout: "Exit",
+    logoutConfirm: "Log out and return to the access screen?",
+    empty: "Write a message to start the conversation.",
+    placeholder: "Write a message…",
+    send: "Send",
+    attach: "Attach a file",
+    removeAtt: "Remove attachment",
+    errGeneric: "Something went wrong. Please try again.",
+    errNetwork: "A network error occurred.",
+    uploadFailed: "Error while uploading the file.",
+    fileTooBig: (name: string) => `"${name}" exceeds the 5 MB limit.`,
+    fileUnreadable: (name: string) => `Could not read "${name}".`,
+    fileUnsupported: (name: string) => `Unsupported file type: "${name}".`,
+  },
+};
+
+function parseLang(value: unknown): Lang | null {
+  return value === "it" || value === "en" ? value : null;
+}
 
 function persistMessages(msgs: Msg[]) {
   try {
@@ -68,6 +124,8 @@ export default function Home() {
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [showCode, setShowCode] = useState(false);
+  const [lang, setLang] = useState<Lang>("it");
+  const t = STRINGS[lang];
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -89,6 +147,8 @@ export default function Home() {
       .then((d) => {
         if (!active) return;
         const ok = Boolean(d?.ok);
+        const savedLang = parseLang(d?.lang);
+        if (savedLang) setLang(savedLang);
         if (ok) {
           try {
             const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
@@ -140,6 +200,9 @@ export default function Home() {
         body: JSON.stringify({ code: code.trim() }),
       });
       if (res.ok) {
+        const data = await res.json().catch(() => null);
+        const newLang = parseLang(data?.lang);
+        if (newLang) setLang(newLang);
         // Nuovo accesso = conversazione pulita.
         try {
           sessionStorage.removeItem(CHAT_STORAGE_KEY);
@@ -148,17 +211,17 @@ export default function Home() {
         setAuthed(true);
         setCode("");
       } else {
-        setAuthError("Codice non valido. Riprova.");
+        setAuthError(GATE.invalid);
       }
     } catch {
-      setAuthError("Errore di rete. Riprova.");
+      setAuthError(GATE.network);
     } finally {
       setAuthLoading(false);
     }
   }
 
   async function logout() {
-    if (!window.confirm("Uscire e tornare alla schermata di accesso?")) return;
+    if (!window.confirm(t.logoutConfirm)) return;
     try {
       await fetch("/api/session", { method: "DELETE" });
     } catch {
@@ -192,7 +255,7 @@ export default function Home() {
     try {
       for (const file of files) {
         if (file.size > MAX_FILE_BYTES) {
-          setNotice(`"${file.name}" supera il limite di 5 MB.`);
+          setNotice(t.fileTooBig(file.name));
           continue;
         }
         const kind = classifyFile(file.name, file.type);
@@ -204,7 +267,7 @@ export default function Home() {
           fd.append("file", file);
           const res = await fetch("/api/upload", { method: "POST", body: fd });
           if (!res.ok) {
-            setNotice(`Impossibile leggere "${file.name}".`);
+            setNotice(t.fileUnreadable(file.name));
             continue;
           }
           const data = await res.json();
@@ -213,11 +276,11 @@ export default function Home() {
             { type: "document", name: data.name ?? file.name, text: data.text ?? "" },
           ]);
         } else {
-          setNotice(`Tipo di file non supportato: "${file.name}".`);
+          setNotice(t.fileUnsupported(file.name));
         }
       }
     } catch {
-      setNotice("Errore durante il caricamento del file.");
+      setNotice(t.uploadFailed);
     } finally {
       setUploading(false);
     }
@@ -254,7 +317,7 @@ export default function Home() {
       if (!res.ok || !res.body) {
         setMessages((m) => [
           ...m,
-          { role: "assistant", content: "Si è verificato un errore. Riprova." },
+          { role: "assistant", content: t.errGeneric },
         ]);
         return;
       }
@@ -276,7 +339,7 @@ export default function Home() {
     } catch {
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: "Si è verificato un errore di rete." },
+        { role: "assistant", content: t.errNetwork },
       ]);
     } finally {
       setSending(false);
@@ -299,7 +362,7 @@ export default function Home() {
   if (authed === null) {
     return (
       <main className="center">
-        <div className="muted">Caricamento…</div>
+        <div className="muted">{GATE.loading}</div>
       </main>
     );
   }
@@ -311,7 +374,7 @@ export default function Home() {
           <IussLogo className="gate-logo" />
           <div className="gate-head">
             <h1 className="gate-title">AI-Based Decision Making</h1>
-            <p className="gate-event">Evento di Orientamento · IUSS Pavia</p>
+            <p className="gate-event">{GATE.event}</p>
           </div>
           <div className="gate-form">
             <div className="input-wrap">
@@ -327,7 +390,7 @@ export default function Home() {
                 type={showCode ? "text" : "password"}
                 autoComplete="off"
                 autoFocus
-                placeholder="Inserisci il codice di accesso"
+                placeholder={GATE.placeholder}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
               />
@@ -360,10 +423,10 @@ export default function Home() {
             )}
             <button className="btn gate-btn" type="submit" disabled={authLoading || !code.trim()}>
               {authLoading ? (
-                "Verifica…"
+                GATE.checking
               ) : (
                 <>
-                  Entra
+                  {GATE.enter}
                   <svg className="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M5 12h14" />
                     <path d="M13 6l6 6-6 6" />
@@ -387,21 +450,21 @@ export default function Home() {
               <span className="header-title">AI-Based Decision Making</span>
               <span className="header-version">{APP_VERSION}</span>
             </span>
-            <span className="header-event">Evento di Orientamento · IUSS Pavia</span>
+            <span className="header-event">{t.event}</span>
           </div>
         </div>
-        <button className="header-logout" type="button" onClick={logout} title="Esci">
+        <button className="header-logout" type="button" onClick={logout} title={t.logout}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <path d="M16 17l5-5-5-5" />
             <path d="M21 12H9" />
           </svg>
-          Esci
+          {t.logout}
         </button>
       </header>
       <div className="messages" ref={scrollRef}>
         {messages.length === 0 && (
-          <div className="empty">Scrivi un messaggio per iniziare la conversazione.</div>
+          <div className="empty">{t.empty}</div>
         )}
         {messages.map((m, i) => (
           <div key={i} className={`row ${m.role}`}>
@@ -445,7 +508,7 @@ export default function Home() {
                 <button
                   className="chip-x"
                   onClick={() => removeAttachment(i)}
-                  aria-label="Rimuovi allegato"
+                  aria-label={t.removeAtt}
                 >
                   ×
                 </button>
@@ -460,7 +523,7 @@ export default function Home() {
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading || sending}
-            title="Allega un file"
+            title={t.attach}
           >
             {uploading ? "…" : "+"}
           </button>
@@ -475,7 +538,7 @@ export default function Home() {
           <textarea
             className="composer-input"
             rows={1}
-            placeholder="Scrivi un messaggio…"
+            placeholder={t.placeholder}
             value={input}
             onChange={autoGrow}
             onKeyDown={onKeyDown}
@@ -485,7 +548,7 @@ export default function Home() {
             onClick={sendMessage}
             disabled={sending || uploading || (!input.trim() && attachments.length === 0)}
           >
-            Invia
+            {t.send}
           </button>
         </div>
       </div>

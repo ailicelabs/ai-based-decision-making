@@ -296,6 +296,15 @@ main {
   height: auto;
   margin: 0 auto;
 }
+.gate-art {
+  display: block;
+  width: 160px;
+  height: 160px;
+  max-width: 70%;
+  margin: 0 auto 6px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 .messages {
   flex: 1;
   overflow-y: auto;

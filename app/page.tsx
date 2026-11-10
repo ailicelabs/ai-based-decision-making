@@ -12,7 +12,7 @@ const ACCEPT =
 
 // Mostrata nell'header per confermare a colpo d'occhio quale versione è online.
 // Aggiornala a ogni release.
-const APP_VERSION = "v1.1.0";
+const APP_VERSION = "v1.1.1";
 
 // La conversazione viene salvata qui nel browser (sessionStorage) così sopravvive
 // a un refresh. Si azzera al logout, a un nuovo login e alla chiusura della scheda.
@@ -21,18 +21,18 @@ const CHAT_STORAGE_KEY = "adm_chat_v1";
 // ---------------------------------------------------------------------------
 // Testi dell'interfaccia. La lingua dipende dallo scenario della sessione
 // (meteo = italiano, medicine = inglese) e arriva dal server con /api/session.
-// Prima del login la lingua non è nota: il gate usa etichette bilingui minime.
+// Prima del login la lingua non è nota: il gate è volutamente minimale e in
+// inglese (funziona per entrambi gli scenari).
 // ---------------------------------------------------------------------------
 type Lang = "it" | "en";
 
 const GATE = {
-  loading: "Caricamento… · Loading…",
-  placeholder: "Codice di accesso · Access code",
-  invalid: "Codice non valido. Riprova. · Invalid code, please try again.",
-  network: "Errore di rete. Riprova. · Network error, please try again.",
-  checking: "Verifica… · Checking…",
-  enter: "Entra · Enter",
-  event: "Evento di Orientamento · IUSS Pavia",
+  loading: "Loading…",
+  placeholder: "Access code",
+  invalid: "Invalid code, please try again.",
+  network: "Network error, please try again.",
+  checking: "Checking…",
+  enter: "Enter",
 };
 
 const STRINGS = {
@@ -95,6 +95,17 @@ function persistMessages(msgs: Msg[]) {
       // rinuncia silenziosamente
     }
   }
+}
+
+// Illustrazione del gate: prova /gate-art.png (mettilo in public/); se il file
+// manca si nasconde e il gate resta senza immagine.
+function GateArt() {
+  const [hide, setHide] = useState(false);
+  if (hide) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img className="gate-art" src="/gate-art.png" alt="" onError={() => setHide(true)} />
+  );
 }
 
 // Logo IUSS: prova /iuss-logo.png (mettilo in public/), poi il placeholder
@@ -371,10 +382,9 @@ export default function Home() {
     return (
       <main className="center">
         <form className="gate" onSubmit={submitCode}>
-          <IussLogo className="gate-logo" />
+          <GateArt />
           <div className="gate-head">
             <h1 className="gate-title">AI-Based Decision Making</h1>
-            <p className="gate-event">{GATE.event}</p>
           </div>
           <div className="gate-form">
             <div className="input-wrap">
@@ -398,8 +408,8 @@ export default function Home() {
                 type="button"
                 className="input-toggle"
                 onClick={() => setShowCode((s) => !s)}
-                aria-label={showCode ? "Nascondi codice" : "Mostra codice"}
-                title={showCode ? "Nascondi" : "Mostra"}
+                aria-label={showCode ? "Hide code" : "Show code"}
+                title={showCode ? "Hide" : "Show"}
               >
                 {showCode ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

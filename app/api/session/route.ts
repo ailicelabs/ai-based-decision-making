@@ -6,14 +6,21 @@ import { signSession, verifySession, SESSION_COOKIE } from "@/lib/session";
 
 export const runtime = "nodejs";
 
+// Scenario e lingua servono all'interfaccia (testi e branding dell'header).
+// NON rivelano la condizione: lo scenario il partecipante lo conosce comunque
+// dal compito che svolge; il gruppo (il bias) resta solo lato server.
+function publicInfo(condition: Parameters<typeof scenarioOf>[0]) {
+  const scenario = scenarioOf(condition);
+  return { scenario, lang: languageOf(scenario) };
+}
+
 // Verifica se esiste già una sessione valida (per non rimostrare il gate dopo
-// un refresh). NON rivela la condizione: la lingua deriva dallo scenario, che
-// il partecipante conosce comunque, mai dal gruppo.
+// un refresh).
 export async function GET() {
   const store = await cookies();
   const session = verifySession(store.get(SESSION_COOKIE)?.value);
   if (!session) return NextResponse.json({ ok: false });
-  return NextResponse.json({ ok: true, lang: languageOf(scenarioOf(session.condition)) });
+  return NextResponse.json({ ok: true, ...publicInfo(session.condition) });
 }
 
 // Valida il codice -> condizione -> imposta il cookie di sessione firmato.
@@ -32,7 +39,7 @@ export async function POST(req: Request) {
   }
 
   const token = signSession({ sid: crypto.randomUUID(), condition, iat: Date.now() });
-  const res = NextResponse.json({ ok: true, lang: languageOf(scenarioOf(condition)) });
+  const res = NextResponse.json({ ok: true, ...publicInfo(condition) });
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",

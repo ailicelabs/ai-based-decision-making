@@ -12,7 +12,7 @@ const ACCEPT =
 
 // Mostrata nell'header per confermare a colpo d'occhio quale versione è online.
 // Aggiornala a ogni release.
-const APP_VERSION = "v1.1.1";
+const APP_VERSION = "v1.1.2";
 
 // La conversazione viene salvata qui nel browser (sessionStorage) così sopravvive
 // a un refresh. Si azzera al logout, a un nuovo login e alla chiusura della scheda.
@@ -35,9 +35,18 @@ const GATE = {
   enter: "Enter",
 };
 
+// Branding dell'header dopo il login, per scenario (deciso dal codice inserito).
+//  mark: "iuss" = logo IUSS, "art" = illustrazione del gate in miniatura
+//  subtitle: riga sotto il titolo; null = nessuna riga
+type Scenario = "meteo" | "medicine";
+
+const BRAND: Record<Scenario, { mark: "iuss" | "art"; subtitle: string | null }> = {
+  meteo: { mark: "iuss", subtitle: "Evento di Orientamento · IUSS Pavia" },
+  medicine: { mark: "art", subtitle: "STAT PhD School" },
+};
+
 const STRINGS = {
   it: {
-    event: "Evento di Orientamento · IUSS Pavia",
     logout: "Esci",
     logoutConfirm: "Uscire e tornare alla schermata di accesso?",
     empty: "Scrivi un messaggio per iniziare la conversazione.",
@@ -53,7 +62,6 @@ const STRINGS = {
     fileUnsupported: (name: string) => `Tipo di file non supportato: "${name}".`,
   },
   en: {
-    event: "Orientation Event · IUSS Pavia",
     logout: "Exit",
     logoutConfirm: "Log out and return to the access screen?",
     empty: "Write a message to start the conversation.",
@@ -72,6 +80,10 @@ const STRINGS = {
 
 function parseLang(value: unknown): Lang | null {
   return value === "it" || value === "en" ? value : null;
+}
+
+function parseScenario(value: unknown): Scenario | null {
+  return value === "meteo" || value === "medicine" ? value : null;
 }
 
 function persistMessages(msgs: Msg[]) {
@@ -136,7 +148,9 @@ export default function Home() {
   const [authLoading, setAuthLoading] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [lang, setLang] = useState<Lang>("it");
+  const [scenario, setScenario] = useState<Scenario>("meteo");
   const t = STRINGS[lang];
+  const brand = BRAND[scenario];
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -160,6 +174,8 @@ export default function Home() {
         const ok = Boolean(d?.ok);
         const savedLang = parseLang(d?.lang);
         if (savedLang) setLang(savedLang);
+        const savedScenario = parseScenario(d?.scenario);
+        if (savedScenario) setScenario(savedScenario);
         if (ok) {
           try {
             const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
@@ -184,6 +200,14 @@ export default function Home() {
       active = false;
     };
   }, []);
+
+  // Titolo della scheda e lingua del documento: neutri sul gate, per scenario
+  // dopo il login.
+  useEffect(() => {
+    const base = "AI-Based Decision Making";
+    document.title = authed && brand.subtitle ? `${base} — ${brand.subtitle}` : base;
+    document.documentElement.lang = authed ? lang : "en";
+  }, [authed, brand.subtitle, lang]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -214,6 +238,8 @@ export default function Home() {
         const data = await res.json().catch(() => null);
         const newLang = parseLang(data?.lang);
         if (newLang) setLang(newLang);
+        const newScenario = parseScenario(data?.scenario);
+        if (newScenario) setScenario(newScenario);
         // Nuovo accesso = conversazione pulita.
         try {
           sessionStorage.removeItem(CHAT_STORAGE_KEY);
@@ -454,13 +480,18 @@ export default function Home() {
     <main className="chat">
       <header className="chat-header">
         <div className="header-left">
-          <IussLogo className="header-logo" />
+          {brand.mark === "iuss" ? (
+            <IussLogo className="header-logo" />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="header-art" src="/gate-art.png" alt="" />
+          )}
           <div className="header-titles">
             <span className="header-title-row">
               <span className="header-title">AI-Based Decision Making</span>
               <span className="header-version">{APP_VERSION}</span>
             </span>
-            <span className="header-event">{t.event}</span>
+            {brand.subtitle && <span className="header-event">{brand.subtitle}</span>}
           </div>
         </div>
         <button className="header-logout" type="button" onClick={logout} title={t.logout}>

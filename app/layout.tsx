@@ -9,14 +9,16 @@ const serif = Source_Serif_4({
   variable: "--font-serif",
 });
 
+// Neutro: il gate è condiviso da tutti gli scenari. Dopo il login page.tsx
+// aggiorna titolo della scheda e lingua del documento in base allo scenario.
 export const metadata: Metadata = {
-  title: "AI-Based Decision Making — IUSS Pavia",
-  description: "Evento di Orientamento · IUSS Pavia",
+  title: "AI-Based Decision Making",
+  description: "AI-Based Decision Making",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="it" className={serif.variable}>
+    <html lang="en" className={serif.variable}>
       <body>{children}</body>
     </html>
   );

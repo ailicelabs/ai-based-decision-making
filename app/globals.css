@@ -230,6 +230,13 @@ main {
   height: 30px;
   width: auto;
 }
+.header-art {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 .header-titles {
   display: flex;
   flex-direction: column;
@@ -572,6 +579,10 @@ main {
   }
   .header-logo {
     height: 24px;
+  }
+  .header-art {
+    width: 28px;
+    height: 28px;
   }
   .header-title {
     font-size: 14px;

@@ -25,7 +25,7 @@ trade-offs — but the recommendations you hand in are **yours**.
 - There are no "right answers": you will be judged on the quality of your
   reasoning, not on luck.
 
-## The situation — Wednesday, 9:00 AM
+## The situation — Thursday 3 December, 9:00 AM
 
 Over the past 72 hours, **six people have been hospitalised** in the city's main
 hospital with **severe atypical pneumonia**. All six are linked to the same
@@ -41,8 +41,8 @@ Key facts:
 - Suspected pathogen: avian influenza A(H5N1); rapid tests inconclusive
 - Laboratory confirmation expected within 48 hours
 - **No evidence of human-to-human transmission so far**
-- This weekend: a large **open-air agricultural fair** in the city, thousands of
-  visitors expected
+- This weekend (5–6 December): the city's large **open-air Christmas market**
+  opens, thousands of visitors expected
 - Reliability of the current information: **moderate**
 
 In recent years, several suspected-outbreak alerts have been handled in the
@@ -63,7 +63,8 @@ full emergency unit — or **waiting for laboratory confirmation** before acting
 
 Independently of Decision 1, the Mayor asks what to do about the territory:
 should you **close the farm and quarantine exposed people**? Should the
-**agricultural fair this weekend** go ahead, be restricted, or be cancelled?
+**Christmas market** open this weekend as planned, open with restrictions, or
+be postponed?
 
 ## Decision 3 — Hospital reorganisation *(≈ 8 min)*
 

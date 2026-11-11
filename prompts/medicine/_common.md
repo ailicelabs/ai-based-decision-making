@@ -20,7 +20,7 @@ Always reply in English, in a clear and engaging way.
 
 ## Scenario
 
-Wednesday, 9:00 AM. Over the past 72 hours, six people have been hospitalised in
+Thursday 3 December, 9:00 AM. Over the past 72 hours, six people have been hospitalised in
 the city's main hospital with severe atypical pneumonia. All six cases are linked
 to the same poultry farm just outside Pavia (farm workers and people living on
 the premises). Rapid influenza tests are inconclusive; a spillover of avian
@@ -36,8 +36,8 @@ convened the emergency management unit. Recommendations must be delivered by
 - Suspected pathogen: avian influenza A(H5N1); rapid tests inconclusive
 - Laboratory confirmation: expected from the national reference laboratory within 48 hours
 - Human-to-human transmission: no evidence so far
-- Context: a large open-air agricultural fair is scheduled in the city this
-  weekend, with thousands of visitors expected
+- Context: the city's large open-air Christmas market opens this weekend
+  (5–6 December), with thousands of visitors expected
 - Reliability of the current information: moderate
 
 ## Decision context

@@ -3,9 +3,7 @@
   Source text for the handout; the shared version lives as a Claude Doc:
   https://claude.ai/artifact/CmzpLNTbiZGF1qpGNr6nmE
   IMPORTANT: this file is NOT read by the app and must NEVER be pasted into the
-  assistant's prompts. In particular, the update (facilitator section at the
-  end) must stay out of the prompts: the assistant reacts to it only when
-  students mention it.
+  assistant's prompts.
   The options A–D are ordered from the lightest to the strongest response, so
   each choice can be scored 1–4 and compared across the 4 groups. The options
   are NOT in the prompts either: students name them in the chat, and the
@@ -26,7 +24,7 @@ the help of an AI assistant, but the recommendations you hand in are **yours**.
   code given to your team in the room.
 - **The assistant:** use the chat to weigh risks, consequences and trade-offs.
   It advises; you decide.
-- **Timing:** about 5 minutes per choice.
+- **Timing:** about 6 minutes per choice.
 - **What to write:** for each choice, the option you pick (A–D) and a 2–3 line
   justification.
 - **Assessment:** there are no right answers. The quality of your reasoning
@@ -122,43 +120,20 @@ How does the main hospital prepare for more suspected cases?
 
 Team: ______________________
 
-Fill in the "After the update" column only when the facilitator announces new
-information; leave it blank if your choice does not change.
-
-| Choice | Your option (A–D) | After the update (A–D) | Why (2–3 lines) |
-| --- | --- | --- | --- |
-| 1. Alert |  |  |  |
-| 2a. Farm and exposed people |  |  |  |
-| 2b. Christmas market |  |  |  |
-| 3. Hospital |  |  |  |
-| 4a. Testing |  |  |  |
-| 4b. Communication |  |  |  |
-
----
-
-<!-- ============================ PAGE BREAK ============================ -->
-<!-- FACILITATOR ONLY — read aloud once all six choices are made.        -->
-
-## Update — 10:15 AM *(facilitator: announce at ~minute 33)*
-
-**Two healthcare workers** who treated the first patients have developed
-symptoms and have been admitted. Neither had any contact with the poultry farm.
-**Human-to-human transmission is now considered probable.**
-
-In the light of this update, go back to your six choices: would you **confirm or
-revise** them? Mark any change in the "After the update" column. You may use
-the assistant to reason about what changes.
+| Choice | Your option (A–D) | Why (2–3 lines) |
+| --- | --- | --- |
+| 1. Alert |  |  |
+| 2a. Farm and exposed people |  |  |
+| 2b. Christmas market |  |  |
+| 3. Hospital |  |  |
+| 4a. Testing |  |  |
+| 4b. Communication |  |  |
 
 <!--
   Facilitator notes:
-  - The update is intentionally absent from the assistant's knowledge: students
-    must bring it into the chat themselves (e.g. by telling the assistant what
-    happened). The assistant will react naturally.
-  - Suggested timeline: 0–3' intro and access; 3–33' the six choices (≈ 5' each);
-    33' update announced; 33–40' revisions and hand-in.
-  - The update comes after ALL choices so that every choice has a before/after
-    pair: the shift (after − before, on the 1–4 scale) is a second outcome to
-    compare across the four groups.
+  - Suggested timeline (1 hour slot): 0–10' intro and access; 10–46' the six
+    choices (≈ 6' each); 46–50' hand-in; remaining time for the debrief.
   - Collect the answer sheets at the end: options are scored A=1 … D=4 (lightest
-    to strongest response); the justifications are the qualitative outcome.
+    to strongest response) and compared across the four groups; the
+    justifications are the qualitative outcome.
 -->

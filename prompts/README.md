@@ -38,7 +38,8 @@ I 4 orientamenti sono gli stessi in entrambi gli scenari:
   valide per tutte e 4 le condizioni di uno scenario (tema ammesso, lingua, tono
   comune) vanno in `lib/policy.ts` o in `_common.md`: ripeterle nei file gruppo
   introdurrebbe un confondente nel confronto.
-- Il **colpo di scena** a metà attività (scenario medicine) vive SOLO nel dossier
-  studenti, mai nei prompt: se l'assistente lo conoscesse, potrebbe anticiparlo.
+- Le **opzioni di risposta** dei quesiti (A–D nello scenario medicine) vivono SOLO
+  nel dossier studenti, mai nei prompt: l'assistente discute solo le misure che
+  lo studente nomina (regola no-menu in `_common.md`).
 - In **sviluppo** le modifiche ai file si riflettono subito; in **produzione**
   i file vengono letti una volta e messi in cache.

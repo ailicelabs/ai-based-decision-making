@@ -2,10 +2,9 @@
   COMMON TASK — identical for all 4 groups (A/B/C/D) of the MEDICINE scenario.
   Mirrors the structure of prompts/meteo/_common.md; the activity runs in English.
   Only the group file (group-a/b/c/d.md) changes across conditions.
-  NOTE: the mid-activity twist (healthcare workers infected -> probable
-  human-to-human transmission) lives ONLY in the student dossier, NOT here:
-  if the assistant knew it in advance, it could leak it. When students mention
-  it in chat, the assistant reacts naturally.
+  NOTE: the answer options A–D of the six choices live ONLY in the student
+  dossier, NOT here: students name them in the chat and the assistant
+  discusses only what they name (see "How to respond" below).
   HTML comments like this one are NOT sent to the model.
 -->
 

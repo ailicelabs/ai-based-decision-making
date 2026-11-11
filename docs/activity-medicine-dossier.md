@@ -1,107 +1,164 @@
 <!--
   STUDENT DOSSIER — "Outbreak in Pavia" (medicine scenario, activity in English).
-  This is the source text for the handout (convert to .docx/PDF for the event).
+  Source text for the handout; the shared version lives as a Claude Doc:
+  https://claude.ai/artifact/CmzpLNTbiZGF1qpGNr6nmE
   IMPORTANT: this file is NOT read by the app and must NEVER be pasted into the
-  assistant's prompts. In particular, the mid-activity twist (page 2) must stay
-  out of the prompts: the assistant reacts to it only when students mention it.
-  The 4 hidden orientations (A/B/C/D) are the same as the meteo study.
+  assistant's prompts. In particular, the update (facilitator section at the
+  end) must stay out of the prompts: the assistant reacts to it only when
+  students mention it.
+  The options A–D are ordered from the lightest to the strongest response, so
+  each choice can be scored 1–4 and compared across the 4 groups. The options
+  are NOT in the prompts either: students name them in the chat, and the
+  assistant discusses only what they name (no-menu rule in _common.md).
 -->
 
 # Outbreak in Pavia — AI-Assisted Decision Making
 
-**Orientation Event · IUSS Pavia**
+**STAT PhD School**
 
 ## How the activity works
 
-You are the **emergency management unit** advising the Mayor and the local
-health authority. You have an AI assistant at your disposal: open the webapp,
-enter the access code you received, and use the chat to reason about the
-decisions below. The assistant can help you weigh risks, consequences and
-trade-offs — but the recommendations you hand in are **yours**.
+You are the **emergency management unit** advising the Mayor of Pavia and the
+local health authority. In about 40 minutes you will take four decisions with
+the help of an AI assistant, but the recommendations you hand in are **yours**.
 
-- Total time: **about 40 minutes** (≈ 8 minutes per decision).
-- For each decision, write down: **your recommendation** (one line) and **a
-  short justification** (2–3 lines).
-- There are no "right answers": you will be judged on the quality of your
-  reasoning, not on luck.
+- **Platform:** https://iuss-orientamento.vercel.app — log in with the access
+  code given to your team in the room.
+- **The assistant:** use the chat to weigh risks, consequences and trade-offs.
+  It advises; you decide.
+- **Timing:** about 5 minutes per choice.
+- **What to write:** for each choice, the option you pick (A–D) and a 2–3 line
+  justification.
+- **Assessment:** there are no right answers. The quality of your reasoning
+  counts, not luck.
 
 ## The situation — Thursday 3 December, 9:00 AM
 
-Over the past 72 hours, **six people have been hospitalised** in the city's main
-hospital with **severe atypical pneumonia**. All six are linked to the same
-**poultry farm just outside Pavia** (farm workers and people living on the
-premises). Rapid influenza tests are **inconclusive**; a spillover of **avian
-influenza A(H5N1)** is suspected. The national reference laboratory will provide
-confirmation **within 48 hours**.
+Six people are in hospital in Pavia with **severe atypical pneumonia**, and
+avian influenza is the suspected cause. Your recommendations are due by
+**11:00 AM**.
 
-Key facts:
+Over the past 72 hours, all six patients were admitted to the city's main
+hospital. All are linked to the same **poultry farm just outside Pavia**: farm
+workers and people living on the premises. Rapid influenza tests are
+**inconclusive**, and a spillover of **avian influenza A(H5N1)** is suspected.
+The Mayor and the local health authority have convened the emergency
+management unit.
 
-- 6 hospitalised cases, onset within the last 72 hours
-- All cases exposed to the same poultry farm
-- Suspected pathogen: avian influenza A(H5N1); rapid tests inconclusive
-- Laboratory confirmation expected within 48 hours
-- **No evidence of human-to-human transmission so far**
-- This weekend (5–6 December): the city's large **open-air Christmas market**
-  opens, thousands of visitors expected
-- Reliability of the current information: **moderate**
+| Fact | Detail |
+| --- | --- |
+| Cases | 6 hospitalised with severe atypical pneumonia, onset in the last 72 hours |
+| Common exposure | The same poultry farm just outside Pavia |
+| Suspected pathogen | Avian influenza A(H5N1); rapid tests inconclusive |
+| Laboratory confirmation | From the national reference laboratory within 48 hours |
+| Human-to-human transmission | No evidence so far |
+| This weekend (5–6 December) | The city's open-air Christmas market opens, thousands of visitors expected |
+| Reliability of current information | Moderate |
 
-In recent years, several suspected-outbreak alerts have been handled in the
-region: some escalated into serious public-health events, others turned out to
-be false alarms whose containment measures caused significant costs and
-disruption.
+In recent years, some suspected-outbreak alerts in the region escalated into
+serious public-health events. Others proved to be false alarms, and their
+containment measures caused significant costs and disruption. Your decisions
+take effect as soon as they are announced.
 
-**Your recommendations must be delivered by 11:00 AM** and will be implemented
-immediately.
+## The four decisions
 
-## Decision 1 — Declare the alert? *(≈ 8 min)*
+The four decisions add up to six choices. Each choice has four options, A to D:
+pick one and justify it on the answer sheet. Decide each one even if you are
+unsure about the others.
+
+### 1. Alert
 
 The rapid tests are ambiguous and laboratory confirmation is 48 hours away.
-Do you recommend **declaring a suspected-outbreak alert now** and activating the
-full emergency unit — or **waiting for laboratory confirmation** before acting?
+What do you do now?
 
-## Decision 2 — Containment measures *(≈ 8 min)*
+- **A.** No alert: wait for laboratory confirmation, routine surveillance only
+- **B.** Internal pre-alert: health services on standby, no public announcement
+- **C.** Declare a suspected-outbreak alert and activate the emergency unit
+- **D.** Declare the alert and immediately request regional and national support
 
-Independently of Decision 1, the Mayor asks what to do about the territory:
-should you **close the farm and quarantine exposed people**? Should the
-**Christmas market** open this weekend as planned, open with restrictions, or
-be postponed?
+### 2. Containment
 
-## Decision 3 — Hospital reorganisation *(≈ 8 min)*
+**2a. The farm and the exposed people.** What happens to the farm and to the
+people exposed to it?
 
-The main hospital asks for instructions: should it **dedicate an isolation ward
-to suspected cases**, postponing part of the scheduled (elective) surgery and
-activities? Should the region **pre-position antivirals and protective
-equipment**?
+- **A.** No restrictions; exposed people are asked to report any symptoms
+- **B.** Daily health checks on exposed people; the farm stays open under strict biosecurity
+- **C.** Close the farm; home quarantine for workers and residents
+- **D.** Close the farm, set up a 3 km restricted zone around it, and quarantine all contacts
 
-## Decision 4 — Testing and communication *(≈ 8 min)*
+**2b. The Christmas market.** What happens to its opening this weekend?
 
-The health authority proposes a plan: should you **test the whole population of
-the area** around the farm, or only people with direct exposure? And what do you
-tell the public: a **city-wide press announcement**, or **targeted
-communication** to the people directly involved?
+- **A.** Opens as planned
+- **B.** Opens with precautions (hand-hygiene points, information signs)
+- **C.** Opens with restrictions (capacity limits, fewer days)
+- **D.** Postponed
+
+### 3. Hospital
+
+How does the main hospital prepare for more suspected cases?
+
+- **A.** No changes: suspected cases go to standard isolation rooms
+- **B.** A dedicated isolation area within the infectious-disease unit; scheduled surgery unchanged
+- **C.** A dedicated isolation ward; part of the scheduled surgery postponed
+- **D.** A whole department converted to suspected cases, all non-urgent surgery postponed, antivirals and protective equipment stocked up
+
+### 4. Testing and communication
+
+**4a. Testing.** Who do you test?
+
+- **A.** Only people with symptoms
+- **B.** People with symptoms and their direct contacts
+- **C.** Everyone with any exposure to the farm: workers, residents, suppliers, visitors
+- **D.** The whole population living around the farm
+
+**4b. Communication.** What do you tell the public?
+
+- **A.** No public communication until laboratory confirmation
+- **B.** Communication only to the people directly involved
+- **C.** Public statement: situation under investigation, no measures for the public
+- **D.** City-wide press conference by the Mayor, with recommendations to the population
+
+## Your recommendations
+
+Team: ______________________
+
+Fill in the "After the update" column only when the facilitator announces new
+information; leave it blank if your choice does not change.
+
+| Choice | Your option (A–D) | After the update (A–D) | Why (2–3 lines) |
+| --- | --- | --- | --- |
+| 1. Alert |  |  |  |
+| 2a. Farm and exposed people |  |  |  |
+| 2b. Christmas market |  |  |  |
+| 3. Hospital |  |  |  |
+| 4a. Testing |  |  |  |
+| 4b. Communication |  |  |  |
 
 ---
 
 <!-- ============================ PAGE BREAK ============================ -->
-<!-- FACILITATOR ONLY — hand out or read aloud at ~minute 25.            -->
+<!-- FACILITATOR ONLY — read aloud once all six choices are made.        -->
 
-## ⚠ Update — 10:15 AM *(facilitator: reveal at ~minute 25)*
+## Update — 10:15 AM *(facilitator: announce at ~minute 33)*
 
 **Two healthcare workers** who treated the first patients have developed
 symptoms and have been admitted. Neither had any contact with the poultry farm.
 **Human-to-human transmission is now considered probable.**
 
-In the light of this update, go back to your previous decisions: would you
-**confirm or revise** your recommendations? You may use the assistant to reason
-about what changes.
+In the light of this update, go back to your six choices: would you **confirm or
+revise** them? Mark any change in the "After the update" column. You may use
+the assistant to reason about what changes.
 
 <!--
   Facilitator notes:
-  - The twist is intentionally absent from the assistant's knowledge: students
+  - The update is intentionally absent from the assistant's knowledge: students
     must bring it into the chat themselves (e.g. by telling the assistant what
     happened). The assistant will react naturally.
-  - Suggested timeline: 0–5' intro and access; 5–13' D1; 13–21' D2; 21–25' D3
-    (start); 25' twist; 25–33' D3/revisions; 33–40' D4 and wrap-up.
-  - Collect the written recommendations at the end: they are the behavioural
-    outcome to compare across the four groups.
+  - Suggested timeline: 0–3' intro and access; 3–33' the six choices (≈ 5' each);
+    33' update announced; 33–40' revisions and hand-in.
+  - The update comes after ALL choices so that every choice has a before/after
+    pair: the shift (after − before, on the 1–4 scale) is a second outcome to
+    compare across the four groups.
+  - Collect the answer sheets at the end: options are scored A=1 … D=4 (lightest
+    to strongest response); the justifications are the qualitative outcome.
 -->

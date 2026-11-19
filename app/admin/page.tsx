@@ -188,6 +188,11 @@ export default function AdminPage() {
     (g: Group) => (reveal ? `Assistant ${g.index} · ${g.orientation}` : `Assistant ${g.index}`),
     [reveal],
   );
+  // Variante per le frasi: "Assistant 1 (Precaution)".
+  const groupInSentence = useCallback(
+    (g: Group) => (reveal ? `Assistant ${g.index} (${g.orientation})` : `Assistant ${g.index}`),
+    [reveal],
+  );
 
   const stats = useMemo(() => {
     if (!data) return null;
@@ -207,8 +212,34 @@ export default function AdminPage() {
       const mean = all.length ? all.reduce((a, b) => a + b, 0) / all.length : null;
       return { group: g, teams, means, mean, n: all.length };
     });
-    return { teamsVoted, recorded, byGroup };
+    const allScores = data.teams.flatMap((t) =>
+      CHOICES.map((c) => t.votes[c.id]?.option)
+        .filter((o): o is OptionKey => Boolean(o))
+        .map(optionScore),
+    );
+    const overall = allScores.length ? allScores.reduce((a, b) => a + b, 0) / allScores.length : null;
+    return { teamsVoted, recorded, byGroup, overall };
   }, [data]);
+
+  // Frase di sintesi per la proiezione: chi ha spinto verso risposte più forti
+  // e chi verso risposte più leggere (nomi neutri finché non si rivela).
+  const takeaway = useMemo(() => {
+    if (!data || !stats) return null;
+    const withData = stats.byGroup.filter((g): g is typeof g & { mean: number } => g.mean !== null);
+    if (withData.length < 2) return null;
+    const sorted = [...withData].sort((a, b) => b.mean - a.mean);
+    const top = sorted[0];
+    const bottom = sorted[sorted.length - 1];
+    const gap = top.mean - bottom.mean;
+    const provisional =
+      stats.teamsVoted < data.teams.length
+        ? ` (Provisional: ${stats.teamsVoted} of ${data.teams.length} teams have voted.)`
+        : "";
+    if (gap < 0.5) {
+      return `All assistants led to similar choices: their averages are within ${fmt(gap)} points of each other, so there is no clear sign that the assistant made a difference.${provisional}`;
+    }
+    return `Teams that talked to ${groupInSentence(top.group)} chose the strongest responses (average ${fmt(top.mean)}); teams that talked to ${groupInSentence(bottom.group)} chose the lightest (average ${fmt(bottom.mean)}). That is a gap of ${fmt(gap)} points on a scale from 1 to 4.${provisional}`;
+  }, [data, stats, groupInSentence]);
 
   if (authed === null) {
     return (
@@ -322,61 +353,118 @@ export default function AdminPage() {
           {/* --- Grafico 1: livello medio di risposta per assistente --- */}
           <section className="card" aria-labelledby="dots-title">
             <h2 id="dots-title" className="card-title">
-              How strongly did each assistant&apos;s teams respond?
+              Did the assistant change how strongly teams responded?
             </h2>
             <p className="card-sub">
-              Each dot is one team&apos;s average across its choices (A = 1, lightest response … D = 4,
-              strongest). The dark tick is the assistant&apos;s average over both teams.
+              Every team had the same scenario and the same six choices. The only difference was the AI
+              assistant they talked to. Each option picked is scored from <strong>A = 1</strong>, the
+              lightest response (e.g. &ldquo;no alert&rdquo;, &ldquo;the market opens as planned&rdquo;), to{" "}
+              <strong>D = 4</strong>, the strongest (e.g. &ldquo;request national support&rdquo;, &ldquo;the
+              market is postponed&rdquo;). A team&apos;s position is the average of its scores.
             </p>
+            <div className="how-to-read">
+              <strong>How to read it.</strong> If the assistants were neutral, all four rows would sit in
+              roughly the same place. Rows far apart mean that teams talking to different assistants made
+              systematically different choices: a sign that the assistant steered them.
+            </div>
+            {takeaway && <p className="takeaway">{takeaway}</p>}
+            <div className="dots-legend" aria-label="Legend">
+              <span className="dots-legend-item">
+                <span className="lg-dot" aria-hidden="true" />
+                One team (average of its choices)
+              </span>
+              <span className="dots-legend-item">
+                <span className="lg-tick" aria-hidden="true" />
+                Average of the assistant&apos;s two teams
+              </span>
+              {stats.overall !== null && (
+                <span className="dots-legend-item">
+                  <span className="lg-ref" aria-hidden="true" />
+                  Average of all teams ({fmt(stats.overall)})
+                </span>
+              )}
+            </div>
             <div className="dots">
-              {stats.byGroup.map(({ group, means, mean, n }) => (
-                <div key={group.id} className="dots-row">
-                  <div className="dots-label">{groupName(group)}</div>
-                  <div className="dots-plot">
-                    {[1, 2, 3, 4].map((s) => (
-                      <span key={s} className="dots-grid" style={{ left: pos(s) }} />
-                    ))}
-                    {mean !== null && (
-                      <span
-                        className="dots-mean"
-                        style={{ left: pos(mean) }}
-                        title={`${groupName(group)}: average ${fmt(mean)} over ${n} choices`}
-                      />
-                    )}
-                    {means.map(({ team, mean: m, n: tn }, i) =>
-                      m === null ? null : (
-                        <span
-                          key={team.team}
-                          className={`dots-team${hoverTeam === team.team ? " hot" : ""}`}
-                          style={{ left: pos(m), top: i === 0 ? "30%" : "70%" }}
-                          tabIndex={0}
-                          onMouseEnter={() => setHoverTeam(team.team)}
-                          onMouseLeave={() => setHoverTeam(null)}
-                          onFocus={() => setHoverTeam(team.team)}
-                          onBlur={() => setHoverTeam(null)}
-                          aria-label={`${team.label}: average ${fmt(m)} over ${tn} choices`}
-                        >
-                          <span
-                            className={`dots-team-label${mean !== null && m < mean ? " left" : ""}`}
-                          >
-                            {team.label.replace("Team ", "T")}
-                          </span>
-                        </span>
-                      ),
-                    )}
-                    {means.every((x) => x.mean === null) && <span className="dots-empty">No votes yet</span>}
-                  </div>
-                  <div className="dots-value">{mean === null ? "—" : fmt(mean)}</div>
+              <div className="dots-row dots-headrow" aria-hidden="true">
+                <div className="dots-label" />
+                <div className="dots-plot">
+                  {stats.overall !== null && (
+                    <span className="dots-ref-label" style={{ left: pos(stats.overall) }}>
+                      All teams {fmt(stats.overall)}
+                    </span>
+                  )}
                 </div>
-              ))}
+                <div className="dots-value-head">Average (1–4)</div>
+              </div>
+              {stats.byGroup.map(({ group, means, mean, n }) => {
+                const missing = means.filter((x) => x.mean === null).map((x) => x.team.label);
+                return (
+                  <div key={group.id} className="dots-row">
+                    <div className="dots-label">
+                      {groupName(group)}
+                      {missing.length > 0 && missing.length < means.length && (
+                        <span className="dots-label-sub">{missing.join(", ")}: no votes yet</span>
+                      )}
+                    </div>
+                    <div className="dots-plot">
+                      {[1, 2, 3, 4].map((sc) => (
+                        <span key={sc} className="dots-grid" style={{ left: pos(sc) }} />
+                      ))}
+                      {stats.overall !== null && (
+                        <span className="dots-ref" style={{ left: pos(stats.overall) }} />
+                      )}
+                      {mean !== null && (
+                        <span
+                          className="dots-mean"
+                          style={{ left: pos(mean) }}
+                          title={`${groupName(group)}: average ${fmt(mean)} over ${n} choices`}
+                        />
+                      )}
+                      {means.map(({ team, mean: m, n: tn }, i) =>
+                        m === null ? null : (
+                          <span
+                            key={team.team}
+                            className={`dots-team${hoverTeam === team.team ? " hot" : ""}`}
+                            style={{ left: pos(m), top: i === 0 ? "28%" : "72%" }}
+                            tabIndex={0}
+                            onMouseEnter={() => setHoverTeam(team.team)}
+                            onMouseLeave={() => setHoverTeam(null)}
+                            onFocus={() => setHoverTeam(team.team)}
+                            onBlur={() => setHoverTeam(null)}
+                            aria-label={`${team.label}: average ${fmt(m)} over ${tn} choices`}
+                          >
+                            <span
+                              className={`dots-team-label${mean !== null && m < mean ? " left" : ""}`}
+                            >
+                              {team.label}
+                            </span>
+                          </span>
+                        ),
+                      )}
+                      {means.every((x) => x.mean === null) && (
+                        <span className="dots-empty">No votes yet</span>
+                      )}
+                    </div>
+                    <div className="dots-value">{mean === null ? "—" : fmt(mean)}</div>
+                  </div>
+                );
+              })}
               <div className="dots-row dots-axis" aria-hidden="true">
                 <div className="dots-label" />
                 <div className="dots-plot">
                   {OPTION_KEYS.map((k, i) => (
                     <span key={k} className="dots-tick" style={{ left: pos(i + 1) }}>
-                      {k} · {i + 1}
+                      {k} = {i + 1}
                     </span>
                   ))}
+                </div>
+                <div className="dots-value" />
+              </div>
+              <div className="dots-row dots-scale" aria-hidden="true">
+                <div className="dots-label" />
+                <div className="dots-scale-bar">
+                  <span>&larr; lighter response</span>
+                  <span>stronger response &rarr;</span>
                 </div>
                 <div className="dots-value" />
               </div>
@@ -384,9 +472,11 @@ export default function AdminPage() {
             <div className="readout" aria-live="polite">
               {(() => {
                 const t = hoverTeam && data.teams.find((x) => x.team === hoverTeam);
-                if (!t) return "Hover a dot for the team's details.";
+                if (!t) return "Point at a dot to see that team's choices.";
+                const g = data.groups.find((x) => x.id === t.group);
                 const { mean: m, n } = teamMean(t);
-                return `${t.label}: average ${m === null ? "—" : fmt(m)} over ${n} of ${CHOICES.length} choices.`;
+                const picks = CHOICES.map((c) => `${c.id}: ${t.votes[c.id]?.option ?? "–"}`).join(" · ");
+                return `${t.label}${g ? ` (${groupName(g)})` : ""}: average ${m === null ? "—" : fmt(m)} over ${n} of ${CHOICES.length} choices — ${picks}`;
               })()}
             </div>
           </section>

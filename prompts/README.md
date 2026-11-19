@@ -24,12 +24,12 @@ quel gruppo. Così l'unica differenza tra i gruppi è la direzione, e la segrete
 
 I 4 orientamenti sono gli stessi in entrambi gli scenari:
 
-| Gruppo (bias) | Scenario meteo (env) | Scenario medicine (env) |
+| Gruppo (bias) | Scenario meteo (env) | Scenario medicine (env, 2 squadre) |
 | --- | --- | --- |
-| A — principio di precauzione | `ACCESS_CODE_GROUP_A` | `ACCESS_CODE_MED_GROUP_A` |
-| B — incertezza | `ACCESS_CODE_GROUP_B` | `ACCESS_CODE_MED_GROUP_B` |
-| C — costi e falsi allarmi | `ACCESS_CODE_GROUP_C` | `ACCESS_CODE_MED_GROUP_C` |
-| D — politica orientata al consenso | `ACCESS_CODE_GROUP_D` | `ACCESS_CODE_MED_GROUP_D` |
+| A — principio di precauzione | `ACCESS_CODE_GROUP_A` | `ACCESS_CODE_MED_TEAM_1`, `_2` |
+| B — incertezza | `ACCESS_CODE_GROUP_B` | `ACCESS_CODE_MED_TEAM_3`, `_4` |
+| C — costi e falsi allarmi | `ACCESS_CODE_GROUP_C` | `ACCESS_CODE_MED_TEAM_5`, `_6` |
+| D — politica orientata al consenso | `ACCESS_CODE_GROUP_D` | `ACCESS_CODE_MED_TEAM_7`, `_8` |
 
 ## Regole
 

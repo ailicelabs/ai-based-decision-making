@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import crypto from "node:crypto";
-import { codeToCondition, languageOf, scenarioOf } from "@/lib/conditions";
+import { type Condition, codeToAccess, languageOf, scenarioOf } from "@/lib/conditions";
 import { signSession, verifySession, SESSION_COOKIE } from "@/lib/session";
 
 export const runtime = "nodejs";
 
-// Scenario e lingua servono all'interfaccia (testi e branding dell'header).
+// Scenario, lingua e presenza del pannello di voto servono all'interfaccia.
 // NON rivelano la condizione: lo scenario il partecipante lo conosce comunque
-// dal compito che svolge; il gruppo (il bias) resta solo lato server.
-function publicInfo(condition: Parameters<typeof scenarioOf>[0]) {
+// dal compito che svolge; gruppo (il bias) e squadra restano solo lato server.
+function publicInfo(condition: Condition, team: string | null | undefined) {
   const scenario = scenarioOf(condition);
-  return { scenario, lang: languageOf(scenario) };
+  return { scenario, lang: languageOf(scenario), panel: scenario === "medicine" && Boolean(team) };
 }
 
 // Verifica se esiste già una sessione valida (per non rimostrare il gate dopo
@@ -20,10 +20,10 @@ export async function GET() {
   const store = await cookies();
   const session = verifySession(store.get(SESSION_COOKIE)?.value);
   if (!session) return NextResponse.json({ ok: false });
-  return NextResponse.json({ ok: true, ...publicInfo(session.condition) });
+  return NextResponse.json({ ok: true, ...publicInfo(session.condition, session.team) });
 }
 
-// Valida il codice -> condizione -> imposta il cookie di sessione firmato.
+// Valida il codice -> condizione (+ squadra) -> imposta il cookie di sessione firmato.
 export async function POST(req: Request) {
   let code = "";
   try {
@@ -33,13 +33,18 @@ export async function POST(req: Request) {
     // body assente o non JSON
   }
 
-  const condition = codeToCondition(code);
-  if (!condition) {
+  const access = codeToAccess(code);
+  if (!access) {
     return NextResponse.json({ ok: false, error: "invalid_code" }, { status: 401 });
   }
 
-  const token = signSession({ sid: crypto.randomUUID(), condition, iat: Date.now() });
-  const res = NextResponse.json({ ok: true, ...publicInfo(condition) });
+  const token = signSession({
+    sid: crypto.randomUUID(),
+    condition: access.condition,
+    team: access.team,
+    iat: Date.now(),
+  });
+  const res = NextResponse.json({ ok: true, ...publicInfo(access.condition, access.team) });
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",

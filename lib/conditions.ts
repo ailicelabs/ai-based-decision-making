@@ -46,29 +46,71 @@ export function languageOf(scenario: Scenario): Lang {
   return scenario === "medicine" ? "en" : "it";
 }
 
-// Mappa: codice di accesso -> condizione. Costruita a runtime dalle variabili
-// d'ambiente, così i codici non finiscono nel repository.
-function entries(): [string | undefined, Condition][] {
+export function isCondition(v: unknown): v is Condition {
+  return typeof v === "string" && (CONDITIONS as string[]).includes(v);
+}
+
+// -----------------------------------------------------------------------------
+//  SQUADRE (solo scenario medicine): 8 codici, 2 squadre per orientamento.
+//  Il gruppo decide il comportamento dell'assistente; la squadra identifica
+//  chi vota (un voto per squadra). Mappatura fissa squadra -> gruppo:
+//  1-2 = A, 3-4 = B, 5-6 = C, 7-8 = D. Vive solo lato server.
+// -----------------------------------------------------------------------------
+export type MedTeam = { team: string; label: string; condition: Condition; envVar: string };
+
+export const MED_TEAMS: MedTeam[] = [
+  { team: "T1", label: "Team 1", condition: "med_group_a", envVar: "ACCESS_CODE_MED_TEAM_1" },
+  { team: "T2", label: "Team 2", condition: "med_group_a", envVar: "ACCESS_CODE_MED_TEAM_2" },
+  { team: "T3", label: "Team 3", condition: "med_group_b", envVar: "ACCESS_CODE_MED_TEAM_3" },
+  { team: "T4", label: "Team 4", condition: "med_group_b", envVar: "ACCESS_CODE_MED_TEAM_4" },
+  { team: "T5", label: "Team 5", condition: "med_group_c", envVar: "ACCESS_CODE_MED_TEAM_5" },
+  { team: "T6", label: "Team 6", condition: "med_group_c", envVar: "ACCESS_CODE_MED_TEAM_6" },
+  { team: "T7", label: "Team 7", condition: "med_group_d", envVar: "ACCESS_CODE_MED_TEAM_7" },
+  { team: "T8", label: "Team 8", condition: "med_group_d", envVar: "ACCESS_CODE_MED_TEAM_8" },
+];
+
+export function isMedTeam(v: unknown): v is string {
+  return typeof v === "string" && MED_TEAMS.some((t) => t.team === v);
+}
+
+// Gruppi dello scenario medicine come li mostra l'area admin: neutri
+// ("Assistant 1–4") finché non si rivela l'orientamento.
+export const MED_GROUPS: { condition: Condition; index: number; orientation: string }[] = [
+  { condition: "med_group_a", index: 1, orientation: "Precaution" },
+  { condition: "med_group_b", index: 2, orientation: "Uncertainty" },
+  { condition: "med_group_c", index: 3, orientation: "Costs & false alarms" },
+  { condition: "med_group_d", index: 4, orientation: "Consensus & reassurance" },
+];
+
+export type Access = { condition: Condition; team: string | null };
+
+// Mappa: codice di accesso -> condizione (+ squadra). Costruita a runtime dalle
+// variabili d'ambiente, così i codici non finiscono nel repository.
+function entries(): [string | undefined, Access][] {
   return [
-    [process.env.ACCESS_CODE_GROUP_A, "group_a"],
-    [process.env.ACCESS_CODE_GROUP_B, "group_b"],
-    [process.env.ACCESS_CODE_GROUP_C, "group_c"],
-    [process.env.ACCESS_CODE_GROUP_D, "group_d"],
-    [process.env.ACCESS_CODE_MED_GROUP_A, "med_group_a"],
-    [process.env.ACCESS_CODE_MED_GROUP_B, "med_group_b"],
-    [process.env.ACCESS_CODE_MED_GROUP_C, "med_group_c"],
-    [process.env.ACCESS_CODE_MED_GROUP_D, "med_group_d"],
+    [process.env.ACCESS_CODE_GROUP_A, { condition: "group_a", team: null }],
+    [process.env.ACCESS_CODE_GROUP_B, { condition: "group_b", team: null }],
+    [process.env.ACCESS_CODE_GROUP_C, { condition: "group_c", team: null }],
+    [process.env.ACCESS_CODE_GROUP_D, { condition: "group_d", team: null }],
+    ...MED_TEAMS.map(
+      (t): [string | undefined, Access] => [process.env[t.envVar], { condition: t.condition, team: t.team }],
+    ),
   ];
 }
 
 // Confronto case-insensitive (riduce gli errori di battitura all'evento).
-export function codeToCondition(input: string): Condition | null {
+export function codeToAccess(input: string): Access | null {
   const code = input.trim().toLowerCase();
   if (!code) return null;
-  for (const [configured, condition] of entries()) {
+  for (const [configured, access] of entries()) {
     if (configured && configured.trim().toLowerCase() === code) {
-      return condition;
+      return access;
     }
   }
   return null;
+}
+
+// Quali squadre hanno un codice configurato (per l'area admin; mai i codici).
+export function configuredTeams(): Set<string> {
+  return new Set(MED_TEAMS.filter((t) => Boolean(process.env[t.envVar]?.trim())).map((t) => t.team));
 }

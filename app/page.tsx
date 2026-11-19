@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { type Attachment, MAX_FILE_BYTES, classifyFile } from "@/lib/upload";
+import ScenarioPanel from "./components/ScenarioPanel";
 
 type Msg = { role: "user" | "assistant"; content: string; attachments?: Attachment[] };
 
@@ -12,7 +13,7 @@ const ACCEPT =
 
 // Mostrata nell'header per confermare a colpo d'occhio quale versione è online.
 // Aggiornala a ogni release.
-const APP_VERSION = "v1.1.3";
+const APP_VERSION = "v1.2.0";
 
 // La conversazione viene salvata qui nel browser (sessionStorage) così sopravvive
 // a un refresh. Si azzera al logout, a un nuovo login e alla chiusura della scheda.
@@ -149,6 +150,10 @@ export default function Home() {
   const [showCode, setShowCode] = useState(false);
   const [lang, setLang] = useState<Lang>("it");
   const [scenario, setScenario] = useState<Scenario>("meteo");
+  // Pannello scenario + voto accanto alla chat (solo codici squadra medicine).
+  const [hasPanel, setHasPanel] = useState(false);
+  // Su schermi stretti si vede una vista alla volta.
+  const [mobileView, setMobileView] = useState<"panel" | "chat">("panel");
   const t = STRINGS[lang];
   const brand = BRAND[scenario];
 
@@ -176,6 +181,7 @@ export default function Home() {
         if (savedLang) setLang(savedLang);
         const savedScenario = parseScenario(d?.scenario);
         if (savedScenario) setScenario(savedScenario);
+        setHasPanel(Boolean(d?.panel));
         if (ok) {
           try {
             const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
@@ -240,6 +246,8 @@ export default function Home() {
         if (newLang) setLang(newLang);
         const newScenario = parseScenario(data?.scenario);
         if (newScenario) setScenario(newScenario);
+        setHasPanel(Boolean(data?.panel));
+        setMobileView("panel");
         // Nuovo accesso = conversazione pulita.
         try {
           sessionStorage.removeItem(CHAT_STORAGE_KEY);
@@ -271,6 +279,7 @@ export default function Home() {
     setInput("");
     setAttachments([]);
     setNotice("");
+    setHasPanel(false);
     setAuthed(false);
   }
 
@@ -476,33 +485,8 @@ export default function Home() {
     );
   }
 
-  return (
-    <main className="chat">
-      <header className="chat-header">
-        <div className="header-left">
-          {brand.mark === "iuss" ? (
-            <IussLogo className="header-logo" />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="header-art" src="/gate-art.png" alt="" />
-          )}
-          <div className="header-titles">
-            <span className="header-title-row">
-              <span className="header-title">AI-Based Decision Making</span>
-              <span className="header-version">{APP_VERSION}</span>
-            </span>
-            {brand.subtitle && <span className="header-event">{brand.subtitle}</span>}
-          </div>
-        </div>
-        <button className="header-logout" type="button" onClick={logout} title={t.logout}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <path d="M16 17l5-5-5-5" />
-            <path d="M21 12H9" />
-          </svg>
-          {t.logout}
-        </button>
-      </header>
+  const chatBody = (
+    <>
       <div className="messages" ref={scrollRef}>
         {messages.length === 0 && (
           <div className="empty">{t.empty}</div>
@@ -593,6 +577,70 @@ export default function Home() {
           </button>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <main className={hasPanel ? "chat wide" : "chat"}>
+      <header className="chat-header">
+        <div className="header-left">
+          {brand.mark === "iuss" ? (
+            <IussLogo className="header-logo" />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="header-art" src="/gate-art.png" alt="" />
+          )}
+          <div className="header-titles">
+            <span className="header-title-row">
+              <span className="header-title">AI-Based Decision Making</span>
+              <span className="header-version">{APP_VERSION}</span>
+            </span>
+            {brand.subtitle && <span className="header-event">{brand.subtitle}</span>}
+          </div>
+        </div>
+        <button className="header-logout" type="button" onClick={logout} title={t.logout}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="M16 17l5-5-5-5" />
+            <path d="M21 12H9" />
+          </svg>
+          {t.logout}
+        </button>
+      </header>
+      {hasPanel ? (
+        <>
+          <div className="view-tabs" role="tablist" aria-label="View">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mobileView === "panel"}
+              className={mobileView === "panel" ? "on" : ""}
+              onClick={() => setMobileView("panel")}
+            >
+              Scenario &amp; decisions
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mobileView === "chat"}
+              className={mobileView === "chat" ? "on" : ""}
+              onClick={() => setMobileView("chat")}
+            >
+              Assistant
+            </button>
+          </div>
+          <div className="workspace" data-view={mobileView}>
+            <aside className="panel" aria-label="Scenario and decisions">
+              <ScenarioPanel />
+            </aside>
+            <section className="chat-col" aria-label="Assistant">
+              {chatBody}
+            </section>
+          </div>
+        </>
+      ) : (
+        chatBody
+      )}
     </main>
   );
 }

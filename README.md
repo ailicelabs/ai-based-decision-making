@@ -7,10 +7,16 @@ con bias nascosto viene usato. Le interfacce sono identiche e i codici sono
 opachi: lo studente non sa in quale condizione si trova. Le conversazioni
 vengono registrate in modo anonimo per l'analisi.
 
+Nello scenario **medicine** ogni codice identifica una **squadra** (8 squadre, 2
+per orientamento): accanto alla chat c'è un pannello con lo scenario e la scheda
+di voto della squadra (6 scelte, opzioni A–D + giustificazione). L'area admin
+[`/admin`](app/admin/page.tsx) mostra i risultati per squadra e per assistente,
+apre/chiude il voto, rivela gli orientamenti ed esporta il CSV.
+
 ## Stack
 - Next.js (App Router) + TypeScript
 - OpenAI API (chiamata **solo** lato server, chiave mai esposta al browser)
-- Postgres (Neon, integrazione nativa Vercel) per il log delle conversazioni
+- Postgres (Neon, integrazione nativa Vercel) per il log delle conversazioni e i voti
 - Deploy su Vercel
 
 ## Setup locale
@@ -24,8 +30,12 @@ vengono registrate in modo anonimo per l'analisi.
   (compito uguale per tutti) e un file per gruppo (`group-a.md` … `group-d.md`).
   Vedi [`prompts/README.md`](prompts/README.md). Guardrail e compito comune
   vengono anteposti in automatico da `lib/prompts.ts`.
-- **Gli 8 codici di accesso** (4 gruppi × 2 scenari) → variabili d'ambiente
-  (`.env.local` in locale, env di Vercel in produzione). Vedi `.env.local.example`.
+- **I codici di accesso** (4 per lo scenario meteo, 8 squadre per lo scenario
+  medicine) e il **codice admin** → variabili d'ambiente (`.env.local` in locale,
+  env di Vercel in produzione). Vedi `.env.local.example`.
+- **Testo dello scenario e opzioni del voto** (pannello + admin) →
+  [`lib/scenarios/medicine.ts`](lib/scenarios/medicine.ts). Tienilo allineato con
+  la scheda studenti e con `docs/activity-medicine-dossier.md`.
 - **Il tema consentito (guardrail)** → [`lib/policy.ts`](lib/policy.ts): scrivi il
   contesto/argomento ammesso e, se vuoi, personalizza il messaggio di rifiuto.
 
@@ -37,19 +47,24 @@ vengono registrate in modo anonimo per l'analisi.
 | `OPENAI_TEMPERATURE` | creatività 0–1, default `0.3` (più basso = più coerente) |
 | `SESSION_SECRET` | stringa casuale per firmare il cookie di sessione |
 | `ACCESS_CODE_GROUP_A` / `_B` / `_C` / `_D` | codici dei 4 gruppi — scenario **meteo** (italiano) |
-| `ACCESS_CODE_MED_GROUP_A` / `_B` / `_C` / `_D` | codici dei 4 gruppi — scenario **medicine** (inglese) |
-| `DATABASE_URL` | connessione Postgres (impostata in automatico dall'integrazione Neon su Vercel). Se assente, il log è disattivato. |
+| `ACCESS_CODE_MED_TEAM_1` … `_8` | codici delle 8 squadre — scenario **medicine** (inglese). Squadre 1-2 = gruppo A, 3-4 = B, 5-6 = C, 7-8 = D |
+| `ADMIN_CODE` | codice dell'area `/admin` (risultati del voto). Senza, l'area admin resta chiusa |
+| `DATABASE_URL` | connessione Postgres (impostata in automatico dall'integrazione Neon su Vercel). Se assente, log e voto sono disattivati (in locale il voto usa un archivio in memoria). |
 
 ## Database
-La tabella `messages` viene creata in automatico al primo log:
+Le tabelle vengono create in automatico al primo uso:
 
 ```
-id | session_id | condition | role | content | created_at
+messages:  id | session_id | condition | team | role | content | created_at
+votes:     team | condition | choice | option | justification | updated_by | updated_at
+app_state: key | value            (voting_open = true/false)
 ```
 
 `condition` codifica scenario e gruppo: `group_a`…`group_d` per lo scenario
 meteo (valori storici della v1), `med_group_a`…`med_group_d` per lo scenario
-medicine.
+medicine. `team` (`T1`…`T8`) c'è solo nello scenario medicine. In `votes` c'è
+una riga per squadra × scelta: un voto per squadra, modificabile finché il voto
+è aperto (si chiude dall'area admin).
 
 Export per l'analisi (psql / console Vercel):
 
@@ -71,6 +86,17 @@ Per contenere i costi le immagini vengono inviate al modello solo sull'**ultimo*
 messaggio; nei messaggi precedenti restano dei segnaposto. Per **privacy** i file
 non vengono salvati nel database: nel log resta solo il nome del file.
 
+## Voto e area admin (scenario medicine)
+- **Studenti:** il pannello salva in automatico (opzione e giustificazione
+  separatamente, così due dispositivi della stessa squadra non si sovrascrivono)
+  e ogni 10 s si riallinea con quanto inserito dai compagni.
+- **Admin** (`/admin`, pagina non linkata, accesso con `ADMIN_CODE`): numero di
+  squadre che hanno votato, livello medio di risposta per assistente
+  (A = 1 … D = 4), griglia squadre × scelte con le giustificazioni, pulsanti per
+  chiudere/riaprire il voto e per **rivelare gli orientamenti** (prima compaiono
+  solo come "Assistant 1–4"), export CSV. I nomi degli orientamenti arrivano
+  solo dall'API autenticata, mai dal JavaScript pubblico.
+
 ## Guardrail di tema
 Uno **strato condiviso** (in [`lib/policy.ts`](lib/policy.ts)), identico per tutte
 e 4 le condizioni — così non falsa il confronto sui bias — impedisce risposte
@@ -87,3 +113,5 @@ serve più rigidità si può aggiungere un classificatore pre-check.
 - La condizione **non viene mai inviata al client**: vive in un cookie firmato
   (HMAC, httpOnly). Esperimento in cieco.
 - Usa codici **opachi** (es. `alpha-7421`), non `bias1`, per non rivelare la condizione.
+- Al browser arrivano solo scenario, lingua e presenza del pannello: gruppo e
+  squadra restano nel cookie firmato e lato server.

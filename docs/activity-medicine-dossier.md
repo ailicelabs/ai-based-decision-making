@@ -25,8 +25,10 @@ the help of an AI assistant, but the recommendations you hand in are **yours**.
 - **The assistant:** use the chat to weigh risks, consequences and trade-offs.
   It advises; you decide.
 - **Timing:** about 6 minutes per choice.
-- **What to write:** for each choice, the option you pick (A–D) and a 2–3 line
-  justification.
+- **What to submit:** for each choice, the option you pick (A–D) and a 2–3 line
+  justification, entered in the panel next to the chat. One set of answers per
+  team: everyone using your team's code edits the same answers, and they save
+  automatically.
 - **Assessment:** there are no right answers. The quality of your reasoning
   counts, not luck.
 
@@ -116,7 +118,9 @@ How does the main hospital prepare for more suspected cases?
 - **C.** Public statement: situation under investigation, no measures for the public
 - **D.** City-wide press conference by the Mayor, with recommendations to the population
 
-## Your recommendations
+## Your recommendations (paper backup)
+
+Use this sheet only if the platform is unavailable.
 
 Team: ______________________
 
@@ -133,7 +137,10 @@ Team: ______________________
   Facilitator notes:
   - Suggested timeline (1 hour slot): 0–10' intro and access; 10–46' the six
     choices (≈ 6' each); 46–50' hand-in; remaining time for the debrief.
-  - Collect the answer sheets at the end: options are scored A=1 … D=4 (lightest
-    to strongest response) and compared across the four groups; the
-    justifications are the qualitative outcome.
+  - Teams vote in the platform (one set of answers per team, 8 team codes, 2 per
+    orientation). Follow progress on /admin; close voting from there at the
+    end, then project the results and reveal the orientations for the debrief.
+  - Options are scored A=1 … D=4 (lightest to strongest response) and compared
+    across the four groups; the justifications are the qualitative outcome.
+    The paper sheet is only a backup.
 -->

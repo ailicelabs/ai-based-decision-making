@@ -169,8 +169,8 @@ export async function POST(req: Request) {
       }
 
       // Log PRIMA di chiudere, così la function serverless resta viva.
-      if (lastUserLog) await logMessage(session.sid, session.condition, "user", lastUserLog);
-      if (full) await logMessage(session.sid, session.condition, "assistant", full);
+      if (lastUserLog) await logMessage(session.sid, session.condition, session.team ?? null, "user", lastUserLog);
+      if (full) await logMessage(session.sid, session.condition, session.team ?? null, "assistant", full);
 
       controller.close();
     },

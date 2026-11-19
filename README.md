@@ -96,6 +96,11 @@ non vengono salvati nel database: nel log resta solo il nome del file.
   chiudere/riaprire il voto e per **rivelare gli orientamenti** (prima compaiono
   solo come "Assistant 1–4"), export CSV. I nomi degli orientamenti arrivano
   solo dall'API autenticata, mai dal JavaScript pubblico.
+- **Azzeramento voti** (admin, con conferma): "Reset all votes" cancella le
+  schede di tutte le squadre, "Reset" su una riga solo quella squadra. È
+  definitivo: serve a togliere i voti di prova prima dell'evento (esporta il
+  CSV prima, se ti serve). Non tocca il log delle chat (`messages`): le
+  conversazioni di prova si escludono in analisi filtrando per `created_at`.
 
 ## Guardrail di tema
 Uno **strato condiviso** (in [`lib/policy.ts`](lib/policy.ts)), identico per tutte

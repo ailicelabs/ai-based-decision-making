@@ -74,6 +74,7 @@ export default function AdminPage() {
   const [focus, setFocus] = useState<{ team: string; choice: string } | null>(null);
   const [pinned, setPinned] = useState<{ team: string; choice: string } | null>(null);
   const [hoverTeam, setHoverTeam] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
     document.title = "Results — AI-Based Decision Making";
@@ -148,6 +149,36 @@ export default function AdminPage() {
         body: JSON.stringify({ open: next }),
       });
       if (r.ok) await load();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Azzera i voti di tutte le squadre (team assente) o di una squadra.
+  async function resetVotes(team?: Team) {
+    const question = team
+      ? `Delete all of ${team.label}'s answers and justifications?\n\nThis cannot be undone. Export the CSV first if you need it.`
+      : "Delete ALL teams' answers and justifications?\n\nThis cannot be undone. Export the CSV first if you need it.";
+    if (!window.confirm(question)) return;
+    setBusy(true);
+    try {
+      const r = await fetch("/api/admin/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(team ? { team: team.team } : {}),
+      });
+      const d = await r.json().catch(() => null);
+      if (r.ok) {
+        setPinned(null);
+        setFocus(null);
+        setNotice(
+          `${team ? team.label : "All teams"}: ${d?.deleted ?? 0} answer${d?.deleted === 1 ? "" : "s"} deleted.`,
+        );
+        setTimeout(() => setNotice(""), 6000);
+        await load();
+      } else {
+        setNotice("Reset failed. Please try again.");
+      }
     } finally {
       setBusy(false);
     }
@@ -248,6 +279,9 @@ export default function AdminPage() {
           <a className="admin-btn" href="/api/admin/export">
             Export CSV
           </a>
+          <button type="button" className="admin-btn danger" onClick={() => resetVotes()} disabled={!data || busy}>
+            Reset all votes
+          </button>
           <button type="button" className="admin-btn ghost" onClick={logout}>
             Log out
           </button>
@@ -255,6 +289,11 @@ export default function AdminPage() {
       </header>
 
       {loadError && <div className="admin-error">{loadError}</div>}
+      {notice && (
+        <div className="admin-notice" role="status">
+          {notice}
+        </div>
+      )}
 
       {data && stats && (
         <>
@@ -380,12 +419,15 @@ export default function AdminPage() {
                       </th>
                     ))}
                     <th scope="col">Avg</th>
+                    <th scope="col">
+                      <span className="sr-only">Reset</span>
+                    </th>
                   </tr>
                 </thead>
                 {data.groups.map((g) => (
                   <tbody key={g.id}>
                     <tr className="vgrid-group">
-                      <th colSpan={CHOICES.length + 2} scope="colgroup">
+                      <th colSpan={CHOICES.length + 3} scope="colgroup">
                         {groupName(g)}
                       </th>
                     </tr>
@@ -425,6 +467,17 @@ export default function AdminPage() {
                               );
                             })}
                             <td className="vgrid-avg">{m === null ? "—" : fmt(m)}</td>
+                            <td className="vgrid-reset">
+                              <button
+                                type="button"
+                                className="link-btn"
+                                onClick={() => resetVotes(t)}
+                                disabled={busy || Object.keys(t.votes).length === 0}
+                                aria-label={`Reset ${t.label}'s votes`}
+                              >
+                                Reset
+                              </button>
+                            </td>
                           </tr>
                         );
                       })}

@@ -185,6 +185,30 @@ export async function saveVote(params: {
   });
 }
 
+// Cancella definitivamente i voti: di una squadra, oppure di tutte (team null).
+// Restituisce quante righe (squadra × scelta) sono state eliminate.
+export async function deleteVotes(team: string | null): Promise<number> {
+  const sql = await getSql();
+  if (sql) {
+    const rows = (
+      team === null
+        ? await sql`DELETE FROM votes RETURNING team`
+        : await sql`DELETE FROM votes WHERE team = ${team} RETURNING team`
+    ) as unknown[];
+    return rows.length;
+  }
+  const m = mem();
+  if (!m) throw new StorageUnavailableError("No database configured");
+  let n = 0;
+  for (const [key, row] of Array.from(m.votes.entries())) {
+    if (team === null || row.team === team) {
+      m.votes.delete(key);
+      n += 1;
+    }
+  }
+  return n;
+}
+
 // --------------------------------------------------------------------------
 //  Stato del voto (aperto/chiuso), deciso dall'area admin. Default: aperto.
 // --------------------------------------------------------------------------

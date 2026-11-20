@@ -100,9 +100,9 @@ voto di squadra è collettivo e viene salvato comunque. Finché il partecipante
 non risponde, chat e voto restano bloccati anche lato server.
 
 - **Testi:** [`content/consent/meteo.md`](content/consent/meteo.md) (italiano) e
-  [`content/consent/medicine.md`](content/consent/medicine.md) (inglese). Sono
-  **bozze**: vanno approvate dal comitato etico e completate con l'informativa
-  privacy dell'ente (sostituire i segnaposto `[tra parentesi]`) prima dell'uso.
+  [`content/consent/medicine.md`](content/consent/medicine.md) (inglese). Testo
+  semplificato (responsabile + contatto, dati anonimi, servizio AI esterno,
+  debriefing finale), in attesa di revisione del comitato etico.
 - **Versione:** ogni file ha una riga `<!-- version: ... -->`; cambiala a ogni
   modifica. Ogni consenso è registrato in `consents` con quella versione e con
   l'impronta SHA-256 del testo esatto mostrato.

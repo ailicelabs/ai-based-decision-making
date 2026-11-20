@@ -1,23 +1,21 @@
-<!-- version: draft-2026-11-20 -->
+<!-- version: v1-2026-11-20 -->
 <!--
-  TESTO DI CONSENSO — scenario meteo (italiano). BOZZA: da far esaminare e
-  approvare dal comitato etico e da completare con l'informativa privacy
-  dell'ente prima dell'evento. Sostituisci ogni segnaposto [tra parentesi].
-  Cambia la riga "version" qui sopra a ogni modifica del testo: ogni consenso
-  viene salvato con questa versione e con l'impronta del testo esatto mostrato.
-  I commenti HTML non vengono mostrati ai partecipanti.
+  TESTO DI CONSENSO — scenario meteo (italiano). In attesa di revisione da parte
+  del comitato etico. Cambia la riga "version" qui sopra a ogni modifica del
+  testo: ogni consenso viene salvato con questa versione e con l'impronta del
+  testo esatto mostrato. I commenti HTML non vengono mostrati ai partecipanti.
 -->
 
 ## Partecipazione allo studio
 
-Questa attività fa parte anche di uno studio di ricerca di [gruppo di ricerca, IUSS Pavia] su come gli assistenti di intelligenza artificiale influenzano le decisioni delle persone.
+Questa attività fa parte anche di uno studio di ricerca su come gli assistenti di intelligenza artificiale influenzano le decisioni delle persone, condotto da Christian Salvatore (IUSS Pavia).
 
-**Cosa raccogliamo.** Se acconsenti, salviamo la tua conversazione con l'assistente. Non raccogliamo il tuo nome, la tua email né altre informazioni che ti identifichino. Ti chiediamo di non scrivere dati personali nella chat.
+**Dati anonimi.** Se acconsenti, la tua conversazione con l'assistente viene salvata a fini di ricerca. Non raccogliamo il tuo nome, la tua email né altro che ti identifichi: ti chiediamo quindi di non scrivere dati personali nella chat. I dati sono usati solo per la ricerca e potranno comparire, in forma anonima e aggregata, in pubblicazioni scientifiche.
 
-**Come vengono usati i dati.** I dati sono analizzati in forma anonima e aggregata a fini di ricerca e potranno essere pubblicati in articoli scientifici. Titolare del trattamento: [ente]. Informativa privacy: [link]. Contatti: [email].
+**L'assistente.** L'assistente funziona tramite un servizio di intelligenza artificiale esterno (OpenAI), che riceve i tuoi messaggi per poter rispondere.
 
-**Sullo studio.** Alcuni aspetti dello studio non possono essere spiegati in anticipo, perché conoscerli cambierebbe i risultati. Ti verranno spiegati per intero al termine dell'attività.
+**Sullo studio.** Alcuni aspetti dello studio non possono essere spiegati in anticipo, perché conoscerli cambierebbe i risultati. Ti verranno spiegati al termine dell'attività.
 
-**La tua scelta.** La partecipazione alla ricerca è volontaria. Se non acconsenti puoi comunque svolgere l'attività: la tua conversazione non verrà salvata.
+**La tua scelta.** La partecipazione alla ricerca è volontaria. Se non acconsenti puoi comunque svolgere l'attività, e la tua conversazione non verrà salvata. Poiché i dati sono anonimi, non possono essere ritirati dopo l'attività.
 
-**Ritiro.** Poiché i dati sono anonimi e non possono essere ricondotti a te, non è possibile ritirarli dopo l'attività.
+Domande: christian.salvatore@iusspavia.it

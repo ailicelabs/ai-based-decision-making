@@ -91,6 +91,19 @@ Per contenere i costi le immagini vengono inviate al modello solo sull'**ultimo*
 messaggio; nei messaggi precedenti restano dei segnaposto. Per **privacy** i file
 non vengono salvati nel database: nel log resta solo il nome del file.
 
+## Export dei dati per l'analisi (area admin)
+Tre pulsanti in alto nell'area `/admin`:
+
+| Pulsante | File | Contenuto |
+| --- | --- | --- |
+| **Votes (CSV)** | `outbreak-votes-AAAA-MM-GG.csv` | una riga per squadra × scelta: gruppo, orientamento, opzione, punteggio 1–4, giustificazione |
+| **Chats (CSV)** | `chats-AAAA-MM-GG.csv` | una riga per messaggio dei soli partecipanti con consenso: data, scenario, gruppo, orientamento, squadra, `participant` (id anonimo della sessione), ruolo, testo, versione del consenso |
+| **All data (JSON)** | `study-export-AAAA-MM-GG.json` | tutto insieme: risposte delle squadre, conversazioni raggruppate per partecipante, registro completo dei consensi (anche i rifiuti, senza chat) |
+
+I CSV si aprono direttamente in Excel (UTF-8 con BOM). Il JSON è pensato per R
+o Python. Il campo `participant` collega i messaggi di una stessa persona e,
+tramite `team`, al voto della sua squadra.
+
 ## Consenso alla ricerca (tutti gli scenari)
 Dopo il codice di accesso compare una schermata di consenso, nella lingua dello
 scenario. Per accettare servono due spunte: maggiore età e consenso all'uso dei

@@ -83,6 +83,15 @@ export async function logMessage(
     if (!sql) {
       if (process.env.NODE_ENV !== "production") {
         console.log(`[log:${condition}${team ? `/${team}` : ""}] ${role}: ${content.slice(0, 80)}`);
+        // In locale le chat restano in memoria, così si possono provare gli export.
+        mem()?.messages.push({
+          session_id: sessionId,
+          condition,
+          team,
+          role,
+          content,
+          created_at: new Date().toISOString(),
+        });
       }
       return;
     }
@@ -121,17 +130,28 @@ type ConsentRow = {
   created_at: string;
 };
 
+export type MessageRow = {
+  session_id: string;
+  condition: string;
+  team: string | null;
+  role: string;
+  content: string;
+  created_at: string;
+};
+
 type MemStore = {
   votes: Map<string, VoteRow>;
   state: Map<string, string>;
   consents: Map<string, ConsentRow>;
+  messages: MessageRow[];
 };
 
 function mem(): MemStore | null {
   if (process.env.NODE_ENV === "production") return null;
   const g = globalThis as unknown as { __admMem?: MemStore };
-  if (!g.__admMem) g.__admMem = { votes: new Map(), state: new Map(), consents: new Map() };
+  if (!g.__admMem) g.__admMem = { votes: new Map(), state: new Map(), consents: new Map(), messages: [] };
   if (!g.__admMem.consents) g.__admMem.consents = new Map();
+  if (!g.__admMem.messages) g.__admMem.messages = [];
   return g.__admMem;
 }
 
@@ -298,6 +318,77 @@ export async function consentCounts(conditions: string[]): Promise<{ agreed: num
 }
 
 // --------------------------------------------------------------------------
+//  Export per l'analisi (area admin): chat dei soli partecipanti con consenso
+//  e registro completo dei consensi.
+// --------------------------------------------------------------------------
+
+export type ConsentedMessage = MessageRow & { consent_version: string; consent_hash: string };
+
+export async function getConsentedMessages(): Promise<ConsentedMessage[]> {
+  const sql = await getSql();
+  if (sql) {
+    const rows = (await sql`
+      SELECT m.session_id, m.condition, m.team, m.role, m.content, m.created_at,
+             c.version_label, c.version_hash
+      FROM messages m
+      JOIN consents c ON c.session_id = m.session_id AND c.consent
+      ORDER BY m.session_id, m.created_at, m.id
+    `) as Record<string, unknown>[];
+    return rows.map((r) => ({
+      session_id: String(r.session_id),
+      condition: String(r.condition),
+      team: (r.team as string | null) ?? null,
+      role: String(r.role),
+      content: String(r.content),
+      created_at: new Date(r.created_at as string).toISOString(),
+      consent_version: String(r.version_label),
+      consent_hash: String(r.version_hash),
+    }));
+  }
+  const m = mem();
+  if (!m) throw new StorageUnavailableError("No database configured");
+  return m.messages
+    .filter((x) => m.consents.get(x.session_id)?.consent === true)
+    .map((x) => {
+      const c = m.consents.get(x.session_id)!;
+      return { ...x, consent_version: c.version_label, consent_hash: c.version_hash };
+    })
+    .sort((a, b) => a.session_id.localeCompare(b.session_id) || a.created_at.localeCompare(b.created_at));
+}
+
+export type ConsentRecord = {
+  session_id: string;
+  condition: string;
+  team: string | null;
+  consent: boolean;
+  version_label: string;
+  version_hash: string;
+  created_at: string;
+};
+
+export async function getAllConsents(): Promise<ConsentRecord[]> {
+  const sql = await getSql();
+  if (sql) {
+    const rows = (await sql`
+      SELECT session_id, condition, team, consent, version_label, version_hash, created_at
+      FROM consents ORDER BY created_at
+    `) as Record<string, unknown>[];
+    return rows.map((r) => ({
+      session_id: String(r.session_id),
+      condition: String(r.condition),
+      team: (r.team as string | null) ?? null,
+      consent: Boolean(r.consent),
+      version_label: String(r.version_label),
+      version_hash: String(r.version_hash),
+      created_at: new Date(r.created_at as string).toISOString(),
+    }));
+  }
+  const m = mem();
+  if (!m) throw new StorageUnavailableError("No database configured");
+  return Array.from(m.consents.values()).sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+// --------------------------------------------------------------------------
 //  Dati di prova: conteggio e cancellazione di voti, consensi e chat per un
 //  insieme di condizioni (lo scenario medicine). Gli altri scenari non vengono
 //  toccati. Irreversibile: la conferma la chiede l'area admin.
@@ -318,7 +409,7 @@ export async function countScenarioData(conditions: string[]): Promise<ScenarioD
   return {
     votes: Array.from(mm.votes.values()).filter((r) => conditions.includes(r.condition)).length,
     consents: Array.from(mm.consents.values()).filter((r) => conditions.includes(r.condition)).length,
-    messages: 0, // in locale senza database le chat non vengono salvate
+    messages: mm.messages.filter((r) => conditions.includes(r.condition)).length,
   };
 }
 
@@ -335,6 +426,7 @@ export async function clearScenarioData(conditions: string[]): Promise<ScenarioD
   const counts = await countScenarioData(conditions);
   for (const [k, r] of Array.from(mm.votes.entries())) if (conditions.includes(r.condition)) mm.votes.delete(k);
   for (const [k, r] of Array.from(mm.consents.entries())) if (conditions.includes(r.condition)) mm.consents.delete(k);
+  mm.messages = mm.messages.filter((r) => !conditions.includes(r.condition));
   return counts;
 }
 

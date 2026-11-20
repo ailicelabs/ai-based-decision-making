@@ -354,8 +354,22 @@ export default function AdminPage() {
           <button type="button" className="admin-btn" onClick={toggleVoting} disabled={!data || busy}>
             {data?.open ? "Close voting" : "Reopen voting"}
           </button>
-          <a className="admin-btn" href="/api/admin/export">
-            Export CSV
+          <a className="admin-btn" href="/api/admin/export" title="Team answers: one row per team and choice">
+            Votes (CSV)
+          </a>
+          <a
+            className="admin-btn"
+            href="/api/admin/export/chats"
+            title="Conversations of consenting participants: one row per message"
+          >
+            Chats (CSV)
+          </a>
+          <a
+            className="admin-btn"
+            href="/api/admin/export/all"
+            title="Everything for analysis: team answers, conversations by participant, consent records"
+          >
+            All data (JSON)
           </a>
           <button type="button" className="admin-btn danger" onClick={() => resetVotes()} disabled={!data || busy}>
             Reset all votes

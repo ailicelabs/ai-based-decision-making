@@ -69,6 +69,12 @@ export const MED_TEAMS: MedTeam[] = [
   { team: "T8", label: "Team 8", condition: "med_group_d", envVar: "ACCESS_CODE_MED_TEAM_8" },
 ];
 
+// Etichetta leggibile della squadra ("Team 5"), uguale in tutti gli export.
+export function teamLabel(team: string | null | undefined): string | null {
+  if (!team) return null;
+  return MED_TEAMS.find((t) => t.team === team)?.label ?? team;
+}
+
 export function isMedTeam(v: unknown): v is string {
   return typeof v === "string" && MED_TEAMS.some((t) => t.team === v);
 }
@@ -81,6 +87,22 @@ export const MED_GROUPS: { condition: Condition; index: number; orientation: str
   { condition: "med_group_c", index: 3, orientation: "Costs & false alarms" },
   { condition: "med_group_d", index: 4, orientation: "Consensus & reassurance" },
 ];
+
+// Orientamento per lettera di gruppo: uguale nei due scenari (vedi prompts/README.md).
+const ORIENTATION_BY_LETTER: Record<string, string> = {
+  a: "Precaution",
+  b: "Uncertainty",
+  c: "Costs & false alarms",
+  d: "Consensus & reassurance",
+};
+
+export function groupLetterOf(condition: string): string {
+  return condition.slice(-1).toUpperCase();
+}
+
+export function orientationOf(condition: string): string {
+  return ORIENTATION_BY_LETTER[condition.slice(-1)] ?? "";
+}
 
 export type Access = { condition: Condition; team: string | null };
 

@@ -189,6 +189,48 @@ export default function AdminPage() {
     }
   }
 
+  // Cancella TUTTI i dati dello scenario medicine (voti, consensi, chat):
+  // serve a togliere le prove prima dell'evento. Mostra prima i conteggi e
+  // chiede di scrivere DELETE.
+  async function clearTestData() {
+    setBusy(true);
+    try {
+      const c = await fetch("/api/admin/clear-test-data", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null);
+      if (!c) {
+        setNotice("Could not read the data to clear. Please try again.");
+        return;
+      }
+      const typed = window.prompt(
+        `Clear ALL data of the outbreak scenario?\n\nThis permanently deletes ${c.votes} team answers, ${c.consents} consent records and ${c.messages} chat messages, then reopens voting. Use it only to remove tests before the event.\n\nType DELETE to confirm.`,
+      );
+      if (typed === null) return;
+      if (typed.trim() !== "DELETE") {
+        setNotice("Nothing deleted: the confirmation text did not match.");
+        return;
+      }
+      const r = await fetch("/api/admin/clear-test-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: "DELETE" }),
+      });
+      const d = await r.json().catch(() => null);
+      if (r.ok && d?.deleted) {
+        setPinned(null);
+        setFocus(null);
+        setNotice(
+          `Test data cleared: ${d.deleted.votes} answers, ${d.deleted.consents} consent records and ${d.deleted.messages} chat messages deleted. Voting is open.`,
+        );
+        await load();
+      } else {
+        setNotice("Clearing failed. Please try again.");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const groupName = useCallback(
     (g: Group) => (reveal ? `Assistant ${g.index} · ${g.orientation}` : `Assistant ${g.index}`),
     [reveal],
@@ -317,6 +359,9 @@ export default function AdminPage() {
           </a>
           <button type="button" className="admin-btn danger" onClick={() => resetVotes()} disabled={!data || busy}>
             Reset all votes
+          </button>
+          <button type="button" className="admin-btn danger" onClick={clearTestData} disabled={!data || busy}>
+            Clear test data
           </button>
           <button type="button" className="admin-btn ghost" onClick={logout}>
             Log out

@@ -126,6 +126,11 @@ non risponde, chat e voto restano bloccati anche lato server.
   definitivo: serve a togliere i voti di prova prima dell'evento (esporta il
   CSV prima, se ti serve). Non tocca il log delle chat (`messages`): le
   conversazioni di prova si escludono in analisi filtrando per `created_at`.
+- **Pulizia delle prove** (admin, "Clear test data"): cancella **tutti** i dati
+  dello scenario medicine (voti, consensi, chat) e riapre il voto. Mostra prima
+  quanti record verranno eliminati e chiede di scrivere `DELETE`. Da usare solo
+  prima dell'evento: dopo cancellerebbe i dati veri. Lo scenario meteo non viene
+  toccato.
 
 ## Guardrail di tema
 Uno **strato condiviso** (in [`lib/policy.ts`](lib/policy.ts)), identico per tutte

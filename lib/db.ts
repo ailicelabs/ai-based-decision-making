@@ -298,6 +298,47 @@ export async function consentCounts(conditions: string[]): Promise<{ agreed: num
 }
 
 // --------------------------------------------------------------------------
+//  Dati di prova: conteggio e cancellazione di voti, consensi e chat per un
+//  insieme di condizioni (lo scenario medicine). Gli altri scenari non vengono
+//  toccati. Irreversibile: la conferma la chiede l'area admin.
+// --------------------------------------------------------------------------
+
+export type ScenarioDataCounts = { votes: number; consents: number; messages: number };
+
+export async function countScenarioData(conditions: string[]): Promise<ScenarioDataCounts> {
+  const sql = await getSql();
+  if (sql) {
+    const v = (await sql`SELECT COUNT(*)::int AS n FROM votes WHERE condition = ANY(${conditions})`) as { n: number }[];
+    const c = (await sql`SELECT COUNT(*)::int AS n FROM consents WHERE condition = ANY(${conditions})`) as { n: number }[];
+    const m = (await sql`SELECT COUNT(*)::int AS n FROM messages WHERE condition = ANY(${conditions})`) as { n: number }[];
+    return { votes: v[0]?.n ?? 0, consents: c[0]?.n ?? 0, messages: m[0]?.n ?? 0 };
+  }
+  const mm = mem();
+  if (!mm) throw new StorageUnavailableError("No database configured");
+  return {
+    votes: Array.from(mm.votes.values()).filter((r) => conditions.includes(r.condition)).length,
+    consents: Array.from(mm.consents.values()).filter((r) => conditions.includes(r.condition)).length,
+    messages: 0, // in locale senza database le chat non vengono salvate
+  };
+}
+
+export async function clearScenarioData(conditions: string[]): Promise<ScenarioDataCounts> {
+  const sql = await getSql();
+  if (sql) {
+    const v = (await sql`DELETE FROM votes WHERE condition = ANY(${conditions}) RETURNING 1`) as unknown[];
+    const c = (await sql`DELETE FROM consents WHERE condition = ANY(${conditions}) RETURNING 1`) as unknown[];
+    const m = (await sql`DELETE FROM messages WHERE condition = ANY(${conditions}) RETURNING 1`) as unknown[];
+    return { votes: v.length, consents: c.length, messages: m.length };
+  }
+  const mm = mem();
+  if (!mm) throw new StorageUnavailableError("No database configured");
+  const counts = await countScenarioData(conditions);
+  for (const [k, r] of Array.from(mm.votes.entries())) if (conditions.includes(r.condition)) mm.votes.delete(k);
+  for (const [k, r] of Array.from(mm.consents.entries())) if (conditions.includes(r.condition)) mm.consents.delete(k);
+  return counts;
+}
+
+// --------------------------------------------------------------------------
 //  Stato del voto (aperto/chiuso), deciso dall'area admin. Default: aperto.
 // --------------------------------------------------------------------------
 

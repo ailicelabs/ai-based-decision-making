@@ -26,6 +26,8 @@ export async function GET() {
           r?.option ? optionScore(r.option) : null,
           r?.justification ?? null,
           r?.updated_at ?? null,
+          r?.updated_by ?? null,
+          r?.event_label ?? null,
         ]);
       }
     }
@@ -39,6 +41,8 @@ export async function GET() {
       "score",
       "justification",
       "updated_at",
+      "updated_by",
+      "event",
     ];
     return csvResponse(toCsv(header, out), `outbreak-votes-${today()}.csv`);
   } catch (err) {

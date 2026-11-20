@@ -96,13 +96,23 @@ Tre pulsanti in alto nell'area `/admin`:
 
 | Pulsante | File | Contenuto |
 | --- | --- | --- |
-| **Votes (CSV)** | `outbreak-votes-AAAA-MM-GG.csv` | una riga per squadra × scelta: gruppo, orientamento, opzione, punteggio 1–4, giustificazione |
-| **Chats (CSV)** | `chats-AAAA-MM-GG.csv` | una riga per messaggio dei soli partecipanti con consenso: data, scenario, gruppo, orientamento, squadra, `participant` (id anonimo della sessione), ruolo, testo, versione del consenso |
-| **All data (JSON)** | `study-export-AAAA-MM-GG.json` | tutto insieme: risposte delle squadre, conversazioni raggruppate per partecipante, registro completo dei consensi (anche i rifiuti, senza chat) |
+| **Votes (CSV)** | `outbreak-votes-AAAA-MM-GG.csv` | stato finale: una riga per squadra × scelta, con gruppo, orientamento, opzione, punteggio 1–4, giustificazione, ora e autore (`updated_by`) dell'ultima modifica, evento |
+| **Vote log (CSV)** | `vote-log-AAAA-MM-GG.csv` | **ogni** modifica ai voti in ordine di tempo (opzione o giustificazione), con chi l'ha fatta: mostra quando e dopo quale scambio una squadra ha cambiato idea |
+| **Chats (CSV)** | `chats-AAAA-MM-GG.csv` | una riga per messaggio dei soli partecipanti con consenso: data, evento, scenario, gruppo, orientamento, squadra, `participant` (id anonimo della sessione), ruolo, testo, versione del consenso, modello, temperatura, versione dell'app, `prompt_hash` |
+| **All data (JSON)** | `study-export-AAAA-MM-GG.json` | tutto insieme: risposte delle squadre, registro dei voti, conversazioni raggruppate per partecipante (con i metadati di ogni messaggio), registro completo dei consensi (anche i rifiuti, senza chat) |
 
 I CSV si aprono direttamente in Excel (UTF-8 con BOM). Il JSON è pensato per R
-o Python. Il campo `participant` collega i messaggi di una stessa persona e,
-tramite `team`, al voto della sua squadra.
+o Python. Il campo `participant` collega i messaggi di una stessa persona, le
+modifiche ai voti che ha fatto (`updated_by` / `participant` nel registro) e,
+tramite `team`, il voto della sua squadra. Le date sono in UTC (ISO 8601).
+
+- **Evento:** prima di ogni evento imposta nell'area admin l'etichetta (campo
+  "Event", es. `STAT-2026-12-03`): viene salvata con ogni chat, voto, modifica e
+  consenso, così gli eventi restano distinguibili nello studio aggregato.
+- **`prompt_hash`:** impronta SHA-256 (16 caratteri) del system prompt esatto
+  usato per quella risposta: se modifichi un prompt tra un evento e l'altro, i
+  messaggi restano attribuibili alla versione giusta. `app_version` è la
+  versione del badge (`lib/version.ts`).
 
 ## Consenso alla ricerca (tutti gli scenari)
 Dopo il codice di accesso compare una schermata di consenso, nella lingua dello

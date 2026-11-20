@@ -27,6 +27,7 @@ type Team = {
 type Results = {
   open: boolean;
   consents?: { agreed: number; declined: number };
+  eventLabel?: string | null;
   groups: Group[];
   teams: Team[];
 };
@@ -80,6 +81,7 @@ export default function AdminPage() {
   const [pinned, setPinned] = useState<{ team: string; choice: string } | null>(null);
   const [hoverTeam, setHoverTeam] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
+  const [eventDraft, setEventDraft] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = "Results — AI-Based Decision Making";
@@ -189,6 +191,28 @@ export default function AdminPage() {
     }
   }
 
+  // Etichetta dell'evento: salvata con ogni chat, voto e consenso.
+  async function saveEvent(e: React.FormEvent) {
+    e.preventDefault();
+    if (eventDraft === null) return;
+    setBusy(true);
+    try {
+      const r = await fetch("/api/admin/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label: eventDraft }),
+      });
+      if (r.ok) {
+        setEventDraft(null);
+        await load();
+      } else {
+        setNotice("Invalid event label: use letters, numbers, spaces, dots, dashes (max 60).");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // Cancella TUTTI i dati dello scenario medicine (voti, consensi, chat):
   // serve a togliere le prove prima dell'evento. Mostra prima i conteggi e
   // chiede di scrivere DELETE.
@@ -203,7 +227,7 @@ export default function AdminPage() {
         return;
       }
       const typed = window.prompt(
-        `Clear ALL data of the outbreak scenario?\n\nThis permanently deletes ${c.votes} team answers, ${c.consents} consent records and ${c.messages} chat messages, then reopens voting. Use it only to remove tests before the event.\n\nType DELETE to confirm.`,
+        `Clear ALL data of the outbreak scenario?\n\nThis permanently deletes ${c.votes} team answers, ${c.voteEvents} vote history entries, ${c.consents} consent records and ${c.messages} chat messages, then reopens voting. Use it only to remove tests before the event.\n\nType DELETE to confirm.`,
       );
       if (typed === null) return;
       if (typed.trim() !== "DELETE") {
@@ -220,7 +244,7 @@ export default function AdminPage() {
         setPinned(null);
         setFocus(null);
         setNotice(
-          `Test data cleared: ${d.deleted.votes} answers, ${d.deleted.consents} consent records and ${d.deleted.messages} chat messages deleted. Voting is open.`,
+          `Test data cleared: ${d.deleted.votes} answers, ${d.deleted.voteEvents} vote history entries, ${d.deleted.consents} consent records and ${d.deleted.messages} chat messages deleted. Voting is open.`,
         );
         await load();
       } else {
@@ -359,6 +383,13 @@ export default function AdminPage() {
           </a>
           <a
             className="admin-btn"
+            href="/api/admin/export/vote-log"
+            title="Every change to a team answer, in time order, with who made it"
+          >
+            Vote log (CSV)
+          </a>
+          <a
+            className="admin-btn"
             href="/api/admin/export/chats"
             title="Conversations of consenting participants: one row per message"
           >
@@ -392,6 +423,41 @@ export default function AdminPage() {
 
       {data && stats && (
         <>
+          <section className="event-row" aria-label="Event">
+            <span className="event-name">Event</span>
+            {eventDraft === null ? (
+              <>
+                <strong>{data.eventLabel || "not set"}</strong>
+                <button type="button" className="link-btn" onClick={() => setEventDraft(data.eventLabel ?? "")}>
+                  {data.eventLabel ? "Change" : "Set"}
+                </button>
+                {!data.eventLabel && (
+                  <span className="event-hint">
+                    Set a label before the event (e.g. STAT-2026-12-03): it is saved with every chat, vote and
+                    consent.
+                  </span>
+                )}
+              </>
+            ) : (
+              <form className="event-form" onSubmit={saveEvent}>
+                <input
+                  className="event-input"
+                  value={eventDraft}
+                  maxLength={60}
+                  autoFocus
+                  placeholder="e.g. STAT-2026-12-03"
+                  onChange={(e) => setEventDraft(e.target.value)}
+                />
+                <button type="submit" className="admin-btn" disabled={busy}>
+                  Save
+                </button>
+                <button type="button" className="admin-btn ghost" onClick={() => setEventDraft(null)}>
+                  Cancel
+                </button>
+              </form>
+            )}
+          </section>
+
           <section className="kpis" aria-label="Summary">
             <div className="kpi">
               <div className="kpi-label">Voting</div>

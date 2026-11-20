@@ -1,8 +1,10 @@
+import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import OpenAI from "openai";
 import { verifySession, SESSION_COOKIE } from "@/lib/session";
 import { buildSystemPrompt } from "@/lib/prompts";
-import { logMessage } from "@/lib/db";
+import { logMessage, type MessageMeta } from "@/lib/db";
+import { APP_VERSION } from "@/lib/version";
 import { type Attachment, MAX_DOC_CHARS } from "@/lib/upload";
 
 export const runtime = "nodejs";
@@ -130,6 +132,14 @@ export async function POST(req: Request) {
   const parsedTemp = Number(process.env.OPENAI_TEMPERATURE);
   const temperature = Number.isFinite(parsedTemp) ? parsedTemp : 0.3;
   const system = buildSystemPrompt(session.condition);
+  // Metadati salvati con ogni messaggio: identificano esattamente modello,
+  // parametri e istruzioni (impronta SHA-256 del system prompt) usati.
+  const meta: MessageMeta = {
+    model,
+    temperature,
+    appVersion: APP_VERSION,
+    promptHash: crypto.createHash("sha256").update(system).digest("hex").slice(0, 16),
+  };
   const openaiMessages = buildOpenAIMessages(messages, system);
 
   // Testo per il log dell'ultimo messaggio utente (niente contenuti grezzi dei file).
@@ -173,9 +183,9 @@ export async function POST(req: Request) {
 
       // Log PRIMA di chiudere, così la function serverless resta viva.
       if (storeLog && lastUserLog)
-        await logMessage(session.sid, session.condition, session.team ?? null, "user", lastUserLog);
+        await logMessage(session.sid, session.condition, session.team ?? null, "user", lastUserLog, meta);
       if (storeLog && full)
-        await logMessage(session.sid, session.condition, session.team ?? null, "assistant", full);
+        await logMessage(session.sid, session.condition, session.team ?? null, "assistant", full, meta);
 
       controller.close();
     },

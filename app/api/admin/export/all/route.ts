@@ -6,9 +6,12 @@ import {
   getAllConsents,
   getAllVotes,
   getConsentedMessages,
+  getEventLabel,
+  getVoteEvents,
   StorageUnavailableError,
 } from "@/lib/db";
-import { CHOICES, OPTION_KEYS, optionScore } from "@/lib/scenarios/medicine";
+import { CHOICES, OPTION_KEYS, isOptionKey, optionScore } from "@/lib/scenarios/medicine";
+import { APP_VERSION } from "@/lib/version";
 
 export const runtime = "nodejs";
 
@@ -19,10 +22,12 @@ export const runtime = "nodejs";
 export async function GET() {
   if (!(await isAdmin())) return new Response("Unauthorized", { status: 401 });
   try {
-    const [votes, messages, consents] = await Promise.all([
+    const [votes, messages, consents, voteEvents, currentEvent] = await Promise.all([
       getAllVotes(),
       getConsentedMessages(),
       getAllConsents(),
+      getVoteEvents(),
+      getEventLabel(),
     ]);
 
     const teams = MED_TEAMS.map((t) => ({
@@ -38,6 +43,8 @@ export async function GET() {
           score: v?.option ? optionScore(v.option) : null,
           justification: v?.justification ?? null,
           updated_at: v?.updated_at ?? null,
+          updated_by: v?.updated_by ?? null,
+          event: v?.event_label ?? null,
         };
       }),
     }));
@@ -64,23 +71,43 @@ export async function GET() {
         consented_at: c?.created_at ?? null,
         messages: list.map((m) => ({
           at: m.created_at,
+          event: m.event_label,
           role: m.role === "user" ? "participant" : "assistant",
           content: m.content,
+          model: m.model,
+          temperature: m.temperature,
+          app_version: m.app_version,
+          prompt_hash: m.prompt_hash,
         })),
       };
     });
 
     const body = {
       exported_at: new Date().toISOString(),
+      app_version: APP_VERSION,
+      current_event: currentEvent,
       notes: {
         scoring: Object.fromEntries(OPTION_KEYS.map((k) => [k, optionScore(k)])),
         scoring_meaning: "A = lightest response ... D = strongest response",
         participants: "Only participants who gave research consent; one entry per anonymous session.",
         consents: "Every consent decision, including declines (no conversation data for declines).",
+        vote_log: "Every change to a team answer, in time order; participant = the anonymous session that made it.",
+        prompt_hash: "SHA-256 (first 16 hex) of the exact system prompt used for that reply.",
       },
       choices: CHOICES.map((c) => ({ id: c.id, label: c.label, question: c.question, options: c.options })),
       teams,
       participants,
+      vote_log: voteEvents.map((e) => ({
+        at: e.created_at,
+        event: e.event_label,
+        team: teamLabel(e.team),
+        group: groupLetterOf(e.condition),
+        choice: e.choice,
+        field: e.field,
+        value: e.value,
+        score: e.field === "option" && isOptionKey(e.value) ? optionScore(e.value) : null,
+        participant: e.session_id,
+      })),
       consents: consents.map((c) => ({
         participant: c.session_id,
         scenario: scenarioOf(c.condition as Condition),
@@ -90,6 +117,7 @@ export async function GET() {
         consent: c.consent,
         version: c.version_label,
         hash: c.version_hash,
+        event: c.event_label,
         at: c.created_at,
       })),
     };

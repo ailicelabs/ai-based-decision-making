@@ -138,7 +138,8 @@ Team: ______________________
   - Suggested timeline (1 hour slot): 0–10' intro and access; 10–46' the six
     choices (≈ 6' each); 46–50' hand-in; remaining time for the debrief.
   - Before the event: after testing the platform, use "Clear test data" on
-    /admin so that no test answers, consents or chats remain.
+    /admin so that no test answers, consents or chats remain, then set the
+    "Event" label (e.g. STAT-2026-12-03): it is saved with every record.
   - Teams vote in the platform (one set of answers per team, 8 team codes, 2 per
     orientation). Follow progress on /admin; close voting from there at the
     end, then project the results and reveal the orientations for the debrief.

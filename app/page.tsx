@@ -6,15 +6,13 @@ import remarkGfm from "remark-gfm";
 import { type Attachment, MAX_FILE_BYTES, classifyFile } from "@/lib/upload";
 import ScenarioPanel from "./components/ScenarioPanel";
 import ConsentScreen from "./components/ConsentScreen";
+import { APP_VERSION } from "@/lib/version";
 
 type Msg = { role: "user" | "assistant"; content: string; attachments?: Attachment[] };
 
 const ACCEPT =
   "image/png,image/jpeg,image/webp,image/gif,application/pdf,text/plain,text/csv,text/markdown,.png,.jpg,.jpeg,.webp,.gif,.pdf,.txt,.csv,.md";
 
-// Mostrata nell'header per confermare a colpo d'occhio quale versione è online.
-// Aggiornala a ogni release.
-const APP_VERSION = "v1.4.0";
 
 // La conversazione viene salvata qui nel browser (sessionStorage) così sopravvive
 // a un refresh. Si azzera al logout, a un nuovo login e alla chiusura della scheda.

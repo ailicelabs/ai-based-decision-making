@@ -14,6 +14,7 @@ export async function GET() {
     const rows = await getConsentedMessages();
     const header = [
       "created_at",
+      "event",
       "scenario",
       "group",
       "orientation",
@@ -22,9 +23,14 @@ export async function GET() {
       "role",
       "content",
       "consent_version",
+      "model",
+      "temperature",
+      "app_version",
+      "prompt_hash",
     ];
     const out = rows.map((r) => [
       r.created_at,
+      r.event_label,
       scenarioOf(r.condition as Condition),
       groupLetterOf(r.condition),
       orientationOf(r.condition),
@@ -33,6 +39,10 @@ export async function GET() {
       r.role === "user" ? "participant" : "assistant",
       r.content,
       r.consent_version,
+      r.model,
+      r.temperature,
+      r.app_version,
+      r.prompt_hash,
     ]);
     return csvResponse(toCsv(header, out), `chats-${today()}.csv`);
   } catch (err) {

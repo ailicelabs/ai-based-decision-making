@@ -24,7 +24,12 @@ type Team = {
   lastUpdate: string | null;
   votes: TeamVotes;
 };
-type Results = { open: boolean; groups: Group[]; teams: Team[] };
+type Results = {
+  open: boolean;
+  consents?: { agreed: number; declined: number };
+  groups: Group[];
+  teams: Team[];
+};
 
 const REFRESH_MS = 5000;
 
@@ -340,6 +345,12 @@ export default function AdminPage() {
               <div className="kpi-label">Teams that voted</div>
               <div className="kpi-value">
                 {stats.teamsVoted} / {data.teams.length}
+              </div>
+            </div>
+            <div className="kpi">
+              <div className="kpi-label">Research consent (people)</div>
+              <div className="kpi-value">
+                {data.consents ? `${data.consents.agreed} yes · ${data.consents.declined} no` : "—"}
               </div>
             </div>
             <div className="kpi">

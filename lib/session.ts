@@ -6,6 +6,9 @@ export type SessionData = {
   condition: Condition;
   // Squadra (solo scenario medicine). Assente nelle sessioni meteo.
   team?: string | null;
+  // Consenso alla ricerca: true = accettato, false = rifiutato,
+  // null/assente = non ancora chiesto (la chat resta bloccata finché non risponde).
+  consent?: boolean | null;
   iat: number;
 };
 
@@ -14,6 +17,7 @@ export const ADMIN_COOKIE = "adm_admin";
 
 const SECRET = process.env.SESSION_SECRET || "dev-insecure-secret-change-me";
 const ADMIN_TTL_MS = 12 * 60 * 60 * 1000;
+export const SESSION_MAX_AGE = 60 * 60 * 8; // 8 ore
 
 // Firma un payload con HMAC-SHA256 -> "<base64url-payload>.<base64url-mac>".
 // Il client non può leggere né manomettere il contenuto.
@@ -52,6 +56,7 @@ export function verifySession(token: string | undefined | null): SessionData | n
     sid: d.sid,
     condition: d.condition,
     team: isMedTeam(d.team) ? d.team : null,
+    consent: typeof d.consent === "boolean" ? d.consent : null,
     iat: typeof d.iat === "number" ? d.iat : 0,
   };
 }

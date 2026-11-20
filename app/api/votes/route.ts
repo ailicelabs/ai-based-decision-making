@@ -13,6 +13,7 @@ async function teamSession(): Promise<(SessionData & { team: string }) | null> {
   const store = await cookies();
   const session = verifySession(store.get(SESSION_COOKIE)?.value);
   if (!session || !session.team || scenarioOf(session.condition) !== "medicine") return null;
+  if (typeof session.consent !== "boolean") return null;
   return { ...session, team: session.team };
 }
 

@@ -57,6 +57,7 @@ Le tabelle vengono create in automatico al primo uso:
 ```
 messages:  id | session_id | condition | team | role | content | created_at
 votes:     team | condition | choice | option | justification | updated_by | updated_at
+consents:  session_id | condition | team | consent | version_label | version_hash | created_at
 app_state: key | value            (voting_open = true/false)
 ```
 
@@ -66,12 +67,16 @@ medicine. `team` (`T1`…`T8`) c'è solo nello scenario medicine. In `votes` c'�
 una riga per squadra × scelta: un voto per squadra, modificabile finché il voto
 è aperto (si chiude dall'area admin).
 
-Export per l'analisi (psql / console Vercel):
+Dalla v1.3.0 i messaggi vengono salvati **solo** per i partecipanti che hanno
+dato il consenso alla ricerca. Export per l'analisi (psql / console Vercel),
+limitato alle sessioni con consenso:
 
 ```sql
-SELECT created_at, condition, session_id, role, content
-FROM messages
-ORDER BY created_at;
+SELECT m.created_at, m.condition, m.team, m.session_id, m.role, m.content,
+       c.version_label AS consent_version
+FROM messages m
+JOIN consents c ON c.session_id = m.session_id AND c.consent
+ORDER BY m.created_at;
 ```
 
 ## Caricamento file
@@ -85,6 +90,26 @@ Limiti: **5 MB** per file, testo del documento troncato a **12.000 caratteri**.
 Per contenere i costi le immagini vengono inviate al modello solo sull'**ultimo**
 messaggio; nei messaggi precedenti restano dei segnaposto. Per **privacy** i file
 non vengono salvati nel database: nel log resta solo il nome del file.
+
+## Consenso alla ricerca (tutti gli scenari)
+Dopo il codice di accesso compare una schermata di consenso, nella lingua dello
+scenario. Per accettare servono due spunte: maggiore età e consenso all'uso dei
+dati anonimi. Chi non acconsente partecipa comunque: chat e (nello scenario
+medicine) voto funzionano, ma **la sua conversazione non viene salvata**. Il
+voto di squadra è collettivo e viene salvato comunque. Finché il partecipante
+non risponde, chat e voto restano bloccati anche lato server.
+
+- **Testi:** [`content/consent/meteo.md`](content/consent/meteo.md) (italiano) e
+  [`content/consent/medicine.md`](content/consent/medicine.md) (inglese). Sono
+  **bozze**: vanno approvate dal comitato etico e completate con l'informativa
+  privacy dell'ente (sostituire i segnaposto `[tra parentesi]`) prima dell'uso.
+- **Versione:** ogni file ha una riga `<!-- version: ... -->`; cambiala a ogni
+  modifica. Ogni consenso è registrato in `consents` con quella versione e con
+  l'impronta SHA-256 del testo esatto mostrato.
+- **Ritiro:** i dati sono anonimi, quindi non è previsto il ritiro dopo
+  l'attività (lo dice il testo).
+- Il consenso non è retroattivo: le conversazioni salvate prima della v1.3.0 non
+  hanno una riga in `consents` e la query qui sopra le esclude.
 
 ## Voto e area admin (scenario medicine)
 - **Studenti:** il pannello salva in automatico (opzione e giustificazione

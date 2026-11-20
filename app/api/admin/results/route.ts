@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin";
 import { MED_GROUPS, MED_TEAMS, configuredTeams } from "@/lib/conditions";
-import { getAllVotes, isVotingOpen, StorageUnavailableError } from "@/lib/db";
+import { consentCounts, getAllVotes, isVotingOpen, StorageUnavailableError } from "@/lib/db";
 import type { TeamVotes } from "@/lib/scenarios/medicine";
 
 export const runtime = "nodejs";
@@ -11,7 +11,11 @@ export const runtime = "nodejs";
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ ok: false }, { status: 401 });
   try {
-    const [open, rows] = await Promise.all([isVotingOpen(), getAllVotes()]);
+    const [open, rows, consents] = await Promise.all([
+      isVotingOpen(),
+      getAllVotes(),
+      consentCounts(MED_GROUPS.map((g) => g.condition)),
+    ]);
     const configured = configuredTeams();
     const teams = MED_TEAMS.map((t) => {
       const mine = rows.filter((r) => r.team === t.team);
@@ -34,6 +38,7 @@ export async function GET() {
       {
         ok: true,
         open,
+        consents,
         groups: MED_GROUPS.map((g) => ({
           id: g.condition,
           index: g.index,

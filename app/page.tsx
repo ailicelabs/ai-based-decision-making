@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { type Attachment, MAX_FILE_BYTES, classifyFile } from "@/lib/upload";
 import ScenarioPanel from "./components/ScenarioPanel";
+import ConsentScreen from "./components/ConsentScreen";
 
 type Msg = { role: "user" | "assistant"; content: string; attachments?: Attachment[] };
 
@@ -13,7 +14,7 @@ const ACCEPT =
 
 // Mostrata nell'header per confermare a colpo d'occhio quale versione è online.
 // Aggiornala a ogni release.
-const APP_VERSION = "v1.2.2";
+const APP_VERSION = "v1.3.0";
 
 // La conversazione viene salvata qui nel browser (sessionStorage) così sopravvive
 // a un refresh. Si azzera al logout, a un nuovo login e alla chiusura della scheda.
@@ -154,6 +155,8 @@ export default function Home() {
   const [hasPanel, setHasPanel] = useState(false);
   // Su schermi stretti si vede una vista alla volta.
   const [mobileView, setMobileView] = useState<"panel" | "chat">("panel");
+  // Il partecipante non ha ancora risposto alla schermata di consenso.
+  const [consentRequired, setConsentRequired] = useState(false);
   const t = STRINGS[lang];
   const brand = BRAND[scenario];
 
@@ -182,6 +185,7 @@ export default function Home() {
         const savedScenario = parseScenario(d?.scenario);
         if (savedScenario) setScenario(savedScenario);
         setHasPanel(Boolean(d?.panel));
+        setConsentRequired(Boolean(d?.consentRequired));
         if (ok) {
           try {
             const saved = sessionStorage.getItem(CHAT_STORAGE_KEY);
@@ -247,6 +251,7 @@ export default function Home() {
         const newScenario = parseScenario(data?.scenario);
         if (newScenario) setScenario(newScenario);
         setHasPanel(Boolean(data?.panel));
+        setConsentRequired(Boolean(data?.consentRequired));
         setMobileView("panel");
         // Nuovo accesso = conversazione pulita.
         try {
@@ -280,6 +285,7 @@ export default function Home() {
     setAttachments([]);
     setNotice("");
     setHasPanel(false);
+    setConsentRequired(false);
     setAuthed(false);
   }
 
@@ -358,6 +364,10 @@ export default function Home() {
       });
       if (res.status === 401) {
         setAuthed(false);
+        return;
+      }
+      if (res.status === 403) {
+        setConsentRequired(true);
         return;
       }
       if (!res.ok || !res.body) {
@@ -483,6 +493,10 @@ export default function Home() {
         </form>
       </main>
     );
+  }
+
+  if (consentRequired) {
+    return <ConsentScreen lang={lang} onDone={() => setConsentRequired(false)} />;
   }
 
   const chatBody = (

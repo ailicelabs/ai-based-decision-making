@@ -44,6 +44,16 @@ async function getSql(): Promise<Sql | null> {
           PRIMARY KEY (team, choice)
         )`;
       await sql`
+        CREATE TABLE IF NOT EXISTS consents (
+          session_id TEXT PRIMARY KEY,
+          condition TEXT NOT NULL,
+          team TEXT,
+          consent BOOLEAN NOT NULL,
+          version_label TEXT NOT NULL,
+          version_hash TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )`;
+      await sql`
         CREATE TABLE IF NOT EXISTS app_state (
           key TEXT PRIMARY KEY,
           value TEXT NOT NULL
@@ -101,12 +111,27 @@ export type VoteRow = {
   updated_at: string;
 };
 
-type MemStore = { votes: Map<string, VoteRow>; state: Map<string, string> };
+type ConsentRow = {
+  session_id: string;
+  condition: string;
+  team: string | null;
+  consent: boolean;
+  version_label: string;
+  version_hash: string;
+  created_at: string;
+};
+
+type MemStore = {
+  votes: Map<string, VoteRow>;
+  state: Map<string, string>;
+  consents: Map<string, ConsentRow>;
+};
 
 function mem(): MemStore | null {
   if (process.env.NODE_ENV === "production") return null;
   const g = globalThis as unknown as { __admMem?: MemStore };
-  if (!g.__admMem) g.__admMem = { votes: new Map(), state: new Map() };
+  if (!g.__admMem) g.__admMem = { votes: new Map(), state: new Map(), consents: new Map() };
+  if (!g.__admMem.consents) g.__admMem.consents = new Map();
   return g.__admMem;
 }
 
@@ -207,6 +232,69 @@ export async function deleteVotes(team: string | null): Promise<number> {
     }
   }
   return n;
+}
+
+// --------------------------------------------------------------------------
+//  Consenso alla ricerca: una riga per sessione (= partecipante), con la
+//  versione e l'impronta del testo mostrato.
+// --------------------------------------------------------------------------
+
+export async function recordConsent(params: {
+  sessionId: string;
+  condition: Condition;
+  team: string | null;
+  consent: boolean;
+  versionLabel: string;
+  versionHash: string;
+}): Promise<void> {
+  const { sessionId, condition, team, consent, versionLabel, versionHash } = params;
+  const sql = await getSql();
+  if (sql) {
+    await sql`
+      INSERT INTO consents (session_id, condition, team, consent, version_label, version_hash)
+      VALUES (${sessionId}, ${condition}, ${team}, ${consent}, ${versionLabel}, ${versionHash})
+      ON CONFLICT (session_id) DO UPDATE
+      SET consent = EXCLUDED.consent, version_label = EXCLUDED.version_label,
+          version_hash = EXCLUDED.version_hash, created_at = now()
+    `;
+    return;
+  }
+  const m = mem();
+  if (!m) {
+    // Produzione senza database: niente da registrare (e nessun log delle chat).
+    return;
+  }
+  m.consents.set(sessionId, {
+    session_id: sessionId,
+    condition,
+    team,
+    consent,
+    version_label: versionLabel,
+    version_hash: versionHash,
+    created_at: new Date().toISOString(),
+  });
+}
+
+// Conteggio dei consensi per un insieme di condizioni (area admin).
+export async function consentCounts(conditions: string[]): Promise<{ agreed: number; declined: number }> {
+  const sql = await getSql();
+  if (sql) {
+    const rows = (await sql`
+      SELECT consent, COUNT(*)::int AS n FROM consents
+      WHERE condition = ANY(${conditions}) GROUP BY consent
+    `) as { consent: boolean; n: number }[];
+    return {
+      agreed: rows.find((r) => r.consent)?.n ?? 0,
+      declined: rows.find((r) => !r.consent)?.n ?? 0,
+    };
+  }
+  const m = mem();
+  if (!m) throw new StorageUnavailableError("No database configured");
+  const mine = Array.from(m.consents.values()).filter((r) => conditions.includes(r.condition));
+  return {
+    agreed: mine.filter((r) => r.consent).length,
+    declined: mine.filter((r) => !r.consent).length,
+  };
 }
 
 // --------------------------------------------------------------------------

@@ -6,6 +6,7 @@ const nextConfig = {
   // (altrimenti fs.readFileSync non li troverebbe in produzione).
   outputFileTracingIncludes: {
     "/api/chat": ["./prompts/**/*"],
+    "/api/consent": ["./content/consent/**/*"],
   },
 };
 

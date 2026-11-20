@@ -96,6 +96,9 @@ export async function POST(req: Request) {
   const store = await cookies();
   const session = verifySession(store.get(SESSION_COOKIE)?.value);
   if (!session) return new Response("Unauthorized", { status: 401 });
+  if (typeof session.consent !== "boolean") return new Response("Consent required", { status: 403 });
+  // Si salva solo con consenso alla ricerca; altrimenti la chat funziona ma non lascia traccia.
+  const storeLog = session.consent === true;
 
   // 2) Messaggi dal client.
   let rawMessages: unknown[] = [];
@@ -169,8 +172,10 @@ export async function POST(req: Request) {
       }
 
       // Log PRIMA di chiudere, così la function serverless resta viva.
-      if (lastUserLog) await logMessage(session.sid, session.condition, session.team ?? null, "user", lastUserLog);
-      if (full) await logMessage(session.sid, session.condition, session.team ?? null, "assistant", full);
+      if (storeLog && lastUserLog)
+        await logMessage(session.sid, session.condition, session.team ?? null, "user", lastUserLog);
+      if (storeLog && full)
+        await logMessage(session.sid, session.condition, session.team ?? null, "assistant", full);
 
       controller.close();
     },
